@@ -24,7 +24,8 @@ var redis = new Redis(require('./redis.js'));
 // サーバのアドレスとポート
 //use env!!!
 //Web Server
-var SERVER_IP = process.env.EVENTTRANSFER_SERVICE_HOST;
+//var SERVER_IP = process.env.EVENTTRANSFER_SERVICE_HOST;
+var SERVER_IP = "127.0.0.1";
 var SERVER_PORT = process.env.EVENTTRANSFER_SERVICE_PORT;
 
 /*  Define the sample application. */
