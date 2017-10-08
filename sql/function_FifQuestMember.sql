@@ -2,6 +2,7 @@ DROP PROCEDURE IF EXISTS function_FifQuestMember ;
 DELIMITER //
 CREATE PROCEDURE function_FifQuestMember( IN eventid char(10), teamid char(6))
 BEGIN
+SET SESSION sql_mode = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";
 ###################################################
 DELETE FROM `FifQuestCircle`
 WHERE `FifQuestCircle`.`EventID`= eventid
