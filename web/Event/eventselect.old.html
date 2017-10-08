@@ -1,0 +1,115 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="eventselect">
+			<div data-role="header">
+				<h1>进行中的活动</h1>
+				<!-- 目標先は非jQueryMobile！ -->
+				<a id="buttonToIndex" data-role="button" data-icon="home">首页</a>
+				<div data-role="button" class="ui-btn-right">
+					<a id="buttonToLogout" data-role="button" data-icon="star" data-transition="slide">登出</a>
+				</div>
+			</div>
+
+			<div role="main" class="ui-content">
+				<ul id="quest" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="在下面的任务中搜索!"></ul>
+			</div>
+			
+			<div id="infoArea">请选择你要登入的战斗系统！</div>
+			<div id="eventArea"></div>
+			<br>
+			<div id="eventArea">同人イベント一览</div>
+			<input type="Button" class="old-button" id="eventedit" value="查看/编辑　同人イベント信息" />
+			<br>
+			<div id="teamArea">没有队伍?没有参加活动?</div>
+			<input type="Button" class="old-button" id="teamedit" value="创建/编辑　个人/队伍信息" />
+			<br>
+			<div id="questArea">已加入队伍?编辑团队任务?</div>
+			<input type="Button" class="old-button" id="questedit" value="登录/编辑　团队任务" />
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+				
+					$.get("/team/view/plus",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					
+					$("#buttonToLogout").click(function() {
+						window.location.assign("/logout");
+					});
+					
+					$("#eventedit").click(function() {
+						window.location.assign("/event");
+					});
+					
+					$("#teamedit").click(function() {
+						window.location.assign("/team");
+					});
+					
+					$("#questedit").click(function() {
+						window.location.assign("/quest/view");
+					});
+					
+					var makeUI = function (resData) {
+						for (var i = 0; i < resData.length; i++) {
+							$("#eventArea").append('<input type="Button" class="new-button" id="event' + i + '" value="【' + resData[i].EventName +
+							"】" + resData[i].TeamName + '" />');
+							makeClick(resData, i);
+						}
+						$(".new-button").button();
+					}
+					
+					var makeClick = function(resData,i) {
+						$("#event" + i).on( "vclick", function() {
+							$("#event" + i).prop("disabled", true);
+							$.post("/team/select", {
+									eventid : resData[i].EventID ,
+									teamid : resData[i].TeamID
+								},
+								function selectevent(resdata, status) {
+									alert("Data: " + resdata + "\nStatus: " + status);
+									$("#infoArea").html("您已成功选择活动: " + 
+									" " + resData[i].EventName +
+									" " + resData[i].EventOpenTime + "~" + 
+									" " + resData[i].EventCloseTime +
+									" " + resData[i].EventLocation
+									);
+									$("#event" + i).prop("eabled", false);
+								}
+							);
+						});
+					}
+					
+					
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				//ajax跨域对应 End
+				$("#buttonToIndex").click(function() {
+					window.location.assign("/"); //防止页面样式错误;
+				});
+				//				$("#buttonToCommand").click(function() {
+				//					$.mobile.changePage("/command");
+				//				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

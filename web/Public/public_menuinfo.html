@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<title>お品書き情報</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="public_menuinfo">
+			<div data-role="header">
+				<h1>お品書き情報</h1>
+				<a href="#public_menuinfo_panel" id="public_menuinfo_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+			</div>
+			
+			<div data-role="panel" id="public_menuinfo_panel" data-theme="b">
+				<div id="public_menuinfo_group" data-role="controlgroup" class="ui-controlgroup">
+					<a href="/public/eventinfo" id="public_menuinfo_back" class="ui-btn ui-corner-all" style="text-align:left; ">返回活动检索</a>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<div>可以看到 他人发布和 官方认定作战小组 公开的颁布物信息。</div>
+				<div>点击社团可以自动跳转品链接。<br>（注意:将在新窗口打开外部网站。）</div>
+				<ul id="menuinfoArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="搜索"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var getParam = function(key) {
+						var url = decodeURI(location.href);
+						parameters = url.split("?");
+						params = parameters[1].split("&");
+						var paramsArray = [];
+						for (i = 0; i < params.length; i++) {
+							neet = params[i].split("=");
+							paramsArray.push(neet[0]);
+							paramsArray[neet[0]] = neet[1];
+						}
+						var categoryKey = paramsArray[key];
+						return categoryKey;
+					}
+					
+					$.get("/public/menuinfo/" + getParam("EventID"),
+						function(resData, status) {
+							makeUI(resData);
+					});
+					var makeUI = function (resData) {
+						$("#menuinfoArea").text('');
+						for(one in resData){
+							$("#menuinfoArea").append('<li><a href="' + resData[one].CircleWeb + '" target="_blank" class="ui-btn" data-inline="true" style="text-align:left; ">'
+								+ "位置:" + resData[one].CircleLocation
+								+ "<br>社团名:" + resData[one].CircleName
+								+ "<br>WEB:" + resData[one].CircleWeb
+								+ '</a><li>');
+							//makeTeamClick(resData, one);
+						}
+					}
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+			</script>
+		</div>
+	</body>
+
+</html>

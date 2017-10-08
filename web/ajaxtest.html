@@ -1,0 +1,56 @@
+﻿<!doctype html>
+<html lang="en">
+
+	<head>
+		<title>ajax跨域对应</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="testPage">
+			<div id="testID">HI</div>
+		</div>
+		<script>
+			$(document).ready(function() {
+				//ajax跨域对应
+				$.ajaxSetup({xhrFields:{withCredentials:true}});
+				//$.ajax({
+				//	type: 'POST',
+				//	url:'http://127.0.0.1/username',
+				//	data: {
+				//		username: "sbmikoto"
+				//	},
+				//	success: function(data, textStatus, xhr){
+				//		console.log(textStatus);
+				//		console.log(data);
+				//		$.ajax({
+				//			type: 'POST',
+				//			url:'http://127.0.0.1/userinfo',
+				//			success: function(data, textStatus, xhr){
+				//				console.log(textStatus);
+				//				console.log(data);
+				//				$("#testID").append("用户名: "+ data.username);
+				//			}
+				//		});
+				//	}
+				//});
+				$.post("http://127.0.0.1/username", {
+							username: "sbmikoto"
+						},
+						function(resData, status) {
+							console.log("Data: " + resData + "\nStatus: " + status);
+								$.post("http://127.0.0.1/userinfo" ,
+									function(resData, status) {
+										console.log("Data: " + resData + "\nStatus: " + status);
+										$("#testID").append("用户名: "+ resData.username);
+										});
+						});
+			});
+		</script>
+	</body>
+
+</html>

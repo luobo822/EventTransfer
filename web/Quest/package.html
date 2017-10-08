@@ -1,0 +1,399 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="packagePage">
+			<div id="packUser" data-role="header">
+				<a href="#package_view_panel" id="quest_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+				<div class="ui-flipswitch ui-shadow-inset ui-bar-inheri ui-btn-right" id="save">
+					<span tabindex="1" class="ui-flipswitch-on ui-btn ui-shadow ui-btn-inherit">紧急</span>
+					<span class="ui-flipswitch-off">紧急</span>
+					<input type="checkbox" data-role="flipswitch" data-enhanced="true" data-corners="false" name="flip-checkbox" class="ui-flipswitch-input" id="saveCheck">
+				</div>
+				<h1>详细任务包</h1>
+			</div>
+			
+			<div data-role="panel" id="package_view_panel" data-theme="b">
+				<div id="package_button_group" data-inline="true">
+					<a href="/quest" class="ui-btn ui-corner-all" style="text-align:left; ">返回</a>
+					<a id="package_lock" class="ui-btn ui-corner-all" style="text-align:left; ">标记该任务</a>
+					<a id="package_unlock" class="ui-btn ui-corner-all" style="text-align:left; ">解除该任务</a>
+				</div>
+			</div>
+			<a href="#package_chat_pop" id="package_chat" data-rel="popup" data-role="button" style="position: fixed; bottom: 20px; right: 10px; background: rgb(130, 224, 255); z-index:999;">
+				Chat
+			</a>
+			<div id="package_chat_pop" data-role="popup" data-theme="b" data-shadow="true" class="ui-popup ui-corner-all">
+				<iframe src="/infopad" seamless></iframe>
+			</div>
+			
+			<div data-role="content">
+
+				<div id="packCircle">Loading...</div>
+				<a href="#" id="toDOUMIN" target="view_window" class="ui-btn ui-corner-all ui-first-child">查询该社团的信息</a>
+
+				<select name="select-choice-status" id="select-choice-status" data-native-menu="false">
+					<option value="FI">完成任务</option>
+					<option value="WA">队伍中</option>
+					<option value="FR">空闲中</option>
+				</select>
+
+				<div data-role="fieldcontain" id="allS">
+					<label for="flip-0">全部完成(完全勝利S)</label>
+					<select name="flip-allS" id="flip-allS" data-role="slider" data-native-menu="false">
+						<option value="off">No</option>
+						<option value="on">Yes</option>
+					</select>
+				</div>
+
+				<div data-role="fieldcontain" id="allE">
+					<label for="flip-0">全部完卖(敗退E)</label>
+					<select name="flip-allE" id="flip-allE" data-role="slider" data-native-menu="false">
+						<option value="off">No</option>
+						<option value="on">Yes</option>
+					</select>
+				</div>
+
+				<div id="data-json"></div>
+				<div id="goodsArea"></div>
+
+				<div data-role="fieldcontain" id="sendLock">
+					<h5>提交任务前请先解除锁定</h5>
+					<select name="flip-sendLock" id="flip-sendLock" data-role="slider" data-native-menu="false">
+						<option value="on">已上锁</option>
+						<option value="off">已解锁</option>
+					</select>
+				</div>
+				<input type="button" id="transfer" value="提交任务包!" />
+
+
+			</div>
+
+			<script>
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				 //ajax跨域对应 End
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					$( "#package_chat_pop iframe" )
+						.attr( "width", 0 )
+						.attr( "height", 0 );
+					
+					$( "#package_chat_pop" ).on({
+						popupbeforeposition: function() {
+							$( "#package_chat_pop iframe" )
+								.attr( "width", 256 )
+								.attr( "height",384 );
+						},
+						popupafterclose: function() {
+							$( "#package_chat_pop iframe" )
+								.attr( "width", 0 )
+								.attr( "height", 0 );
+						}
+					});
+					$("#save").click(function() {
+						if ( $("#saveCheck").prop('checked') == true ) {
+							var r = confirm("你真的要开启紧急对应么?操作失误可是要背锅的哟!误开启请返回上一页！");
+							if (r) {
+								$("#transfer").parent().show();
+							} else {
+								$("#transfer").parent().hide();
+								$("#saveCheck").prop('checked',false).flipswitch('refresh');
+							}
+						} else {
+							$("#transfer").parent().hide();
+						}
+					});
+					$("#package_lock").click(function() {
+						var r = confirm("确定要标记任务么?锁定后其他用户进入时将收到提示！");
+						if (r) {
+							$.post("/package/lock", {
+								CircleID: getParam("CircleID")
+							},
+							function (resdata, status) {
+								alert("ResData: " + resdata + "\nStatus: " + status);
+								window.location.assign("/package?CircleID=" + getParam("CircleID")); 
+							});
+								
+						}
+					});
+					$("#package_unlock").click(function() {
+						var r = confirm("确定要标记任务么?只有锁定的任务者或者管理才可解除！");
+						if (r) {
+							$.post("/package/unlock", {
+								CircleID: getParam("CircleID")
+							},
+							function (resdata, status) {
+								alert("ResData: " + resdata + "\nStatus: " + status);
+								window.location.assign("/package?CircleID=" + getParam("CircleID")); 
+							});
+								
+						}
+					});
+					$.post("/package", {
+							CircleID: getParam("CircleID")
+						},
+						function throw_error(data, status) {
+							if (!data[0]) {
+								$("#packCircle").html('<br>该目标已消失或者读取错误！请返回前一个页面</br>');
+								return;
+							}
+							if ( data[0].CircleStatus != "ST" &&
+									data[0].CircleStatus != "ON" ) {
+								$("#transfer").parent().hide();
+							}
+							$("#toDOUMIN").attr("href", data[0].CircleWeb);
+							makeUI(data);
+							update(data);
+						});
+					//UPDATE SQLの発行
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+				var getParam = function(key) {
+					var url = location.href;
+					parameters = url.split("?");
+					params = parameters[1].split("&");
+					var paramsArray = [];
+					for (i = 0; i < params.length; i++) {
+						neet = params[i].split("=");
+						paramsArray.push(neet[0]);
+						paramsArray[neet[0]] = neet[1];
+					}
+					var categoryKey = paramsArray[key];
+					return categoryKey;
+				}
+				var makeUI = function makeit(resData) {
+					var locker = "";
+					if ( resData[0].UserNickName ) {
+						locker = resData[0].UserNickName;
+					}
+					$("#packCircle").html('我是:' + resData[0].UserName + '</br>标记该任务的用户:' + locker + '</br>' + '<h3>【' + resData[0].CircleLocation + '】' + resData[0].CircleName + '</h3></br>');
+					
+					for (var i = 0; i < resData.length; i++) {
+						resData[i].bNum = parseInt(resData[i].bNum);
+						if (isNaN(resData[i].bNum)) {
+							resData[i].bNum = 0;
+						}
+						$("#goodsArea").append('<div id ="goodsArea' + i + '"></div>');
+						$("#goodsArea" + i).append('<div class="new-collapsible" id="goodsColla' + i + '" data-role="collapsible"></div>');
+						var goodsCollaStr = '<h3>' + resData[i].GoodsName +
+							'<br>价格: ' + resData[i].GoodsPrice +
+  							'<br>需求:' + resData[i].Num + ' 已购得:' + resData[i].bNum + 
+  							'<br>物品状态:' + traslation(resData[i].GoodsStatus) + '</h3><br>' +
+							'<label for="goodsText' + i + '">买到的数量:</label>' +
+							'<input class="new-text" type="text"  id="goodsText' + i + '" readonly>' +
+							'<div class="new-button" id="goodsNumU' + i + '" data-role="button" data-inline="true">数量+</div>' +
+							'<div class="new-button" id="goodsNumD' + i + '" data-role="button" data-inline="true">数量-</div>' +
+							'<div class="new-fieldcontain" id="goodsSellout' + i + '" data-role="fieldcontain"></div>' +
+							'<div class="new-fieldcontain" id="goodsRe' + i + '" data-role="fieldcontain"></div>' +
+							'<div id="goodsAreapEx' + i + '" class="ui-field-contain"></div>';
+						$("#goodsColla" + i).append(goodsCollaStr);
+						//数量計算
+						if (resData[i].GoodsStatus == "SO"){
+							resData[i].Num = 0;
+						} else {
+							resData[i].Num = resData[i].Num - resData[i].bNum;
+						}
+						if (resData[i].Num < 0) {
+							resData[i].Num = 0;
+						}
+						$("#goodsSellout" + i).append('<label for="goodsFlip' + i + '">物品状态(正常&完卖):</label>' + '<select class="new-flipswitch" id="goodsFlip' + i + '" data-role="flipswitch"></select>');
+						$("#goodsFlip" + i).append('<option value="OK">正常</option>' + '<option value="SO">完卖</option>');
+						$("#goodsRe" + i).append('<div class="new-button" id="goodsReset' + i + '" data-role="button" data-inline="true">恢复默认数量(默认为最大值)</div>');
+						$("#goodsAreapEx" + i).append('<div class="new-collapsible" id="goodsCollaPlus' + i + '" data-role="collapsible"></div>');
+						var goodsCollaPlusStr = '<h3>更新价格/记入额外信息</h3>' +
+							'<label for="goodsTextPlus' + i + '">价格更新:</label>' +
+							'<input class="new-text" type="text"  id="goodsTextPlus' + i + '" placeholder="麻痹是谁写的？？？啊！草！">' +
+							'<label for="goodsTextEx' + i + '">额外信息:</label>' +
+							'<input class="new-text" type="text"  id="goodsTextEx' + i + '" placeholder="老子死在队伍里面了！！！我要这里留下最后的遗言！！！">';
+						$("#goodsCollaPlus" + i).append(goodsCollaPlusStr);
+						//値設定
+						$("#goodsText" + i).val(resData[i].Num);
+						//事件设定
+						makeEvent(i, resData);
+					}
+					//控件刷新
+					$(".new-button").button();
+					$(".new-flipswitch").flipswitch();
+					$(".new-collapsible").collapsible();
+					$(".new-text").textinput();
+					//样式刷新
+					$(".new-fieldcontain").fieldcontain();
+				}
+				var makeEvent = function(num, resData) {
+					$("#goodsNumU" + num).on("tap", function() {
+						var valueT = Number($("#goodsText" + num).val());
+						if (valueT == 0) {
+							$("#goodsFlip" + num).val("OK").flipswitch("refresh");
+							$("#goodsFlip" + num).flipswitch("enable");
+						}
+						if (valueT < resData[num].Num) {
+							$("#goodsText" + num).val(valueT + 1);
+						}
+					});
+					$("#goodsNumD" + num).on("tap", function() {
+						var valueT = Number($("#goodsText" + num).val());
+						if (valueT == 1 && ( $("#saveCheck").prop('checked') == false ) ) {
+							$("#goodsFlip" + num).val("SO").flipswitch("refresh");
+							$("#goodsFlip" + num).flipswitch("disable");
+						}
+						if (valueT > 0 || ( $("#saveCheck").prop('checked') == true && valueT > ( resData[num].Num * -1 ) ) ) {
+							$("#goodsText" + num).val(valueT - 1);
+						}
+					});
+					$("#goodsReset" + num).on("tap", function() {
+						$("#goodsText" + num).val(resData[num].Num);
+						$("#goodsFlip" + num).val("OK").flipswitch("refresh");
+						$("#goodsFlip" + num).flipswitch("enable");
+					});
+				}
+				var datapack = function(resData) {
+					var goodsCollection = new Array();
+					for (var i = 0; i < resData.length; i++) {
+						goodsCollection[i] = resData[i];
+						goodsCollection[i].Status = $("#select-choice-status").val();
+						goodsCollection[i].GoodsPrice = $("#goodsTextPlus" + i).val();
+						if (goodsCollection[i].Num == $("#goodsText" + i).val()) {
+							if (resData[i].GoodsStatus != "SO"){
+								goodsCollection[i].GoodsStatus = "FI";
+							}
+						} else {
+							goodsCollection[i].GoodsStatus = $("#goodsFlip" + i).val();
+						}
+						goodsCollection[i].Num = $("#goodsText" + i).val();
+						goodsCollection[i].Info = $("#goodsTextEx" + i).val();
+					}
+					return goodsCollection;
+				}
+				var datapackall = function(resData) {
+					var goodsCollection = new Array();
+					for (var i = 0; i < resData.length; i++) {
+						goodsCollection[i] = resData[i];
+						goodsCollection[i].Status = "FI";
+						goodsCollection[i].GoodsPrice = null;
+						goodsCollection[i].Num = $("#goodsText" + i).val();
+						goodsCollection[i].Info = "全部完成啦!";
+						if (resData[i].GoodsStatus != "SO"){
+							goodsCollection[i].GoodsStatus = "FI";
+						}
+					}
+					return goodsCollection;
+				}
+				var datapackfailed = function(resData) {
+					var goodsCollection = new Array();
+					for (var i = 0; i < resData.length; i++) {
+						goodsCollection[i] = resData[i];
+						goodsCollection[i].Status = "FI";
+						goodsCollection[i].GoodsPrice = null;
+						goodsCollection[i].Num = 0;
+						goodsCollection[i].Info = "全部完卖了!";
+						goodsCollection[i].GoodsStatus = "SO";
+					}
+					return goodsCollection;
+				}
+				var wait = function(resData) {
+					var waitInfo = new Array();
+					waitInfo[0] = resData[0];
+					waitInfo[0].Status = "WA";
+					waitInfo[0].GoodsID = null;
+					waitInfo[0].GoodsName = null;
+					waitInfo[0].GoodsPrice = null;
+					waitInfo[0].Num = 0;
+					waitInfo[0].Info = "在队列中!";
+					waitInfo[0].GoodsStatus = "OK";
+					return waitInfo;
+				}
+				var free = function(resData) {
+						var freeInfo = new Array();
+						freeInfo[0] = resData[0];
+						freeInfo[0].Status = "FR";
+						freeInfo[0].GoodsID = null;
+						freeInfo[0].GoodsName = null;
+						freeInfo[0].GoodsPrice = null;
+						freeInfo[0].Num = 0;
+						freeInfo[0].Info = "我现在闲的不行!";
+						freeInfo[0].GoodsStatus = "OK";
+						return freeInfo;
+					}
+					//UPDATE SQLの発行
+				var update = function(resData) {
+					$("#transfer").click(function() {
+						if ($("#flip-sendLock").val() == "off") {
+							$("#transfer").prop("disabled", true);
+							var reqData;
+							if ($("#select-choice-status").val() == "FI") {
+								//
+								if ($("#flip-allS").val() == "on") {
+									reqData = datapackall(resData);
+								} else if ($("#flip-allE").val() == "on") {
+									reqData = datapackfailed(resData);
+								} else {
+									reqData = datapack(resData);
+								}
+								//
+							} else if ($("#select-choice-status").val() == "WA") {
+								reqData = wait(resData);
+							} else if ($("#select-choice-status").val() == "FR") {
+								reqData = free(resData);
+							}
+							console.log("package: " + reqData);
+							$.post("/package_report", {
+									package: reqData
+								},
+								function alert_and_back(data, status) {
+									//$.mobile.changePage("/quest");
+									window.location.assign("/quest");
+									alert("Data: " + data + "\nStatus: " + status);
+								});
+						}
+					});
+				}
+				$("#select-choice-status").change(function() {
+					var staus = $("#select-choice-status").val();
+					if (staus == "WA" || staus == "FR") {
+						$("#allS").hide();
+						$("#allE").hide();
+						$("#goodsArea").hide();
+					} else {
+						$("#allS").show();
+						$("#allE").show();
+						$("#goodsArea").show();
+					}
+				});
+				$("#flip-allS").change(function() {
+					$("#allE").toggle();
+					$("#goodsArea").toggle();
+				});
+				$("#flip-allE").change(function() {
+					$("#allS").toggle();
+					$("#goodsArea").toggle();
+				});
+				
+				var traslation = function(trnData) {
+					if (trnData== "OK") {
+						trnData = '正常';
+					} else if (trnData == "FI") {
+						trnData = '完成';
+					} else if (trnData == "SO") {
+						trnData = '完卖';
+					}
+					return trnData;
+				}
+			</script>
+
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,175 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="questPage">
+			<div data-role="header">
+				<h1>战斗任务一览</h1>
+				<!-- 目標先は非jQueryMobile！ -->
+				<a id="buttonToIndex" data-role="button" data-icon="home">首页</a>
+				<div data-role="button" class="ui-btn-right">
+					<a href="#quest_task_panel" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                攻击顺序</a>
+				</div>
+			</div>
+			
+			<a href="#quest_chat_pop" id="quest_chat" data-rel="popup" data-role="button" style="position: fixed; bottom: 20px; right: 10px; background: rgb(130, 224, 255); z-index:999;">
+				Chat
+			</a>
+			<div id="quest_chat_pop" data-role="popup" data-theme="b" data-shadow="true" class="ui-popup ui-corner-all">
+				<iframe src="/infopad" seamless></iframe>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<ul id="quest" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="在下面的任务中搜索!"></ul>
+			</div>
+			<div data-role="panel" id="quest_task_panel" data-theme="b" data-position="right">
+				<h3>攻击顺序</h3>
+				<div id="minetask" data-inline="true">
+			</div>
+			<div id="quest_sister_pop" data-role="popup" data-theme="a" style="padding:10px 10px;" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<img src="/image/sister" />
+				<h3>【？？？】お兄ちゃん大好き！</h3>
+				<div id="quest_sister_suggestion" data-inline="true">
+			</div>
+			<script>
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				 //ajax跨域对应 End
+				 
+				$( "#quest_chat_pop iframe" )
+					.attr( "width", 0 )
+					.attr( "height", 0 );
+				
+				$( "#quest_chat_pop" ).on({
+					popupbeforeposition: function() {
+						$( "#quest_chat_pop iframe" )
+							.attr( "width", 256 )
+							.attr( "height",384 );
+					},
+					popupafterclose: function() {
+						$( "#quest_chat_pop iframe" )
+							.attr( "width", 0 )
+							.attr( "height", 0 );
+					}
+				});
+				
+				
+				$("#buttonToIndex").click(function() {
+					window.location.assign("/"); //防止页面样式错误;
+				});
+				$("#buttonToTask").click(function() {
+					$.mobile.changePage("/task");
+				});
+				$(document).on("pagecontainerchange", function() {
+					$.get("/quest_info",
+						function make_UI(resData, status) {
+							makeUI(resData);
+						});
+					$(document).unbind("pagecontainerchange");
+				});
+				var makeUI = function(resData) {
+					for (var i = 0; i < resData.length; i++) {
+						var lockerstr = '';
+						if ( resData[i].UserNickName  ) {
+							lockerstr = '该任务已被队友' + resData[i].UserNickName + '标记，';
+						}
+						$("#quest").append('<li id="questList' + i + '"></li>');
+						$("#questList" + i).append('<a id="questListInfo' + i + '"></a>');
+						var pis = '<p id="questListLocation' + i + '"><strong>' + resData[i].CircleLocation + '</strong></p>' +
+							'<p id="questListName' + i + '"><strong>' + resData[i].CircleName + '</strong></p>' +
+							'<p id="questListName' + i + '"><strong>战况 :' + battleStatus(resData[i].CircleStatus) + '</strong></p>' +
+							'<p id="questListText' + i + '">' + lockerstr + '点击以生成任务包</p>';
+						$("#questListInfo" + i).append(pis);
+						makeClick(resData, i);
+					}
+					$("#quest").listview('refresh');
+				}
+				var makeClick = function(resData, long) { //绑定点击事件
+					//if (isBattleOn(resData[long].CircleStatus)) {
+						$("#questListInfo" + long).click(function() {
+							//$.mobile.changePage("/package", {
+							//	data: resData[long]
+							//});
+							if ( resData[long].UserNickName  ) {
+								var r = confirm("该任务已被" + resData[long].UserNickName + "标记。你真的要进入该任务么?");
+								if (!r) {
+									return;
+								}
+							}
+							window.location.assign("/package?CircleID=" + resData[long].CircleID); 
+						});
+					//}
+				}
+				var battleStatus = function(status) {
+					if ( status == 'ST' ) {
+						return '【未完成】好戏开场啦';
+					} else if  ( status == 'ON' ) {
+						return '【未完成・进行中】再来一炮他们就要完蛋';
+					} else if  ( status == 'FI' ) {
+						return '【已完成】目标消失，寻找下一个目标';
+					} else if  ( status == 'GV' ) {
+						return '【未完成・已完成】陡壁指挥官放弃了该任务';
+					} else {
+						return '【未完成・已完成】异常请联系管理员';
+					}
+				}
+				var isBattleOn = function(status) {
+					if (status != 'FI' && status != 'GV') {
+						return true;
+					} else {
+						return false;
+					}
+				}
+				
+				$("#task_menu").click(function() {
+					$("#minetask").text('');
+					$.get("/battle/quest/task",
+						function(resData, status) {
+							for ( one in resData ){
+								$("#minetask").append('<a id="task_pop'+ one +'" data-rel="popup" class="ui-btn">'
+								+ "[" + resData[one].Level + "]"
+								+ resData[one].CircleLocation + " " + resData[one].CircleName + '</a>');
+								task_pop_to(one, resData);
+							}
+							$("#minetask").append('<a href="#quest_sister_pop" id="task_sister" data-rel="popup" data-position-to="window" class="ui-btn">★妹に祈る★</a>');
+							$("#task_sister").click(function() {
+								$("#quest_sister_suggestion").text('');
+								$.get("/battle/quest/sister",
+									function(resData, status) {
+										for ( one in resData ){
+											$("#quest_sister_suggestion").append('<a href="/package?CircleID=' + resData[one].CircleID + '" id="quest_sister_pop_'+ one +'" class="ui-btn" style="text-align:left; ">'
+											+ "[" + resData[one].CircleLocation + "]" + resData[one].CircleName + ', 俺が行く</a>');
+										}
+								});
+							});
+					});
+				});
+				
+				var task_pop_to = function(one, resData) {
+					$("#task_pop" + one).click(function() {
+						//$.mobile.changePage("/package", {
+						//	data: {
+						//		CircleID : resData[one].CircleID
+						//	}
+						//});
+						window.location.assign("/package?CircleID=" + resData[one].CircleID); 
+					});
+				}
+				
+			</script>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,153 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="quest_self">
+			<div data-role="header">
+				<h1>个人需求一览</h1>
+				<a href="#quest_self_panel" id="quest_self" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+			</div>
+			
+			<div data-role="panel" id="quest_self_panel" data-theme="b">
+				<div id="quest_self_buttongroup" data-inline="true">
+					<a id="quest_self_return" class="ui-btn ui-corner-all" style="text-align:left; ">返回</a>
+					<a href="/quest/self.csv" target="view_window" download="self.csv" class="ui-btn ui-corner-all" style="text-align:left; ">个人CSVをダウンロード</a>
+					<a href="#quest_self_loadcsv" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">个人CSV读入</a>
+					<a href="#quest_self_resault_rs" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">查看CSV処理结果</a>
+					<a id="quest_self_delete" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">删除全部个人需求</a>
+				</div>
+			</div>
+
+			<div data-role="popup" id="quest_self_loadcsv" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<form>
+						<h4>
+						严重注意！当你送信后无论成功失败你的所有既存需求都将遭到不可复原性的删除！<br>
+						请一定在读取前首先下载自己的需求列表并且备份！
+						</h4>
+						<h5>
+						格式式样:<br>
+						与本页面下载的个人CSV相同。但不含头部。<br>
+						UTF8,LF,大小5M以内。<br>
+						合并规则:<br>
+						社团位置、名称一致时将不再创建社团。<br>
+						在社团合并的基础上，物品名一致，价格一致的物品将被合并。<br>
+						TIPS:<br>
+						如果你并不想和他人合并社团，请向社团名添加一些你的识别符。<br>
+						同理物品也是一样。<br>
+						</h5>
+						<div id="quest_self_sendstatus"></div>
+						<input type="file" id="quest_self_csvupload" accept=".csv">
+					</form>
+					<button id="quest_self_loadcsv_button" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">送信</button>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<div id="quest_self_total_m"></div>
+				<ul id="quest_self_area" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="输入检索字符"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					window.csvdata = "";
+					$("#quest_self_return").click(function() {
+						window.location.assign("/quest/view");
+					});
+					$.get("/quest/mine",
+						function(resData, status) {
+							var totalMoney = resData[0][0].TotalMoney;
+							$("#quest_self_total_m").html("<h5>已知部分金额总计:" + totalMoney + "</h5>");
+							var resGoodsData = resData[1];
+							for (one in resGoodsData) {
+								$("#quest_self_area").append('<a href="#'
+									+ '" data-rel="popup" id="quest_self_area_button' + one + '" class="ui-btn" style="text-align:left; ">'
+									+ resGoodsData[one].CircleLocation
+									+ " " + resGoodsData[one].CircleName
+									+ "<br><br>"
+									+ resGoodsData[one].GoodsName
+									+ "<br>"
+									+ resGoodsData[one].GoodsPrice
+									+ "  x" + resGoodsData[one].RequestNum
+									+ '</a>');
+								makeeventClick(resGoodsData, one);
+							}
+					});
+					
+					var makeeventClick = function(resGoodsData,one) {
+						$("#quest_self_area_button" + one).on( "vclick", function() {
+							$.mobile.changePage("/quest/circle/goods", {
+								data: {
+									CircleID : resGoodsData[one].CircleID
+								}
+							});
+						});
+					};
+					$("#quest_self_csvupload").on("change", function(event) {
+						window.csvdata = "";
+						var file = event.target.files;
+						//FileReaderの作成
+						var reader = new FileReader();
+						//テキスト形式で読み込む
+						if(file[0]){
+							//Check the size
+							if(file[0].size > 5242880){
+								alert("File is too big, must small than 5M.");
+								return;
+							}
+							reader.readAsText(file[0]);
+						}
+						//読込終了後の処理
+						reader.onload = function(ev){
+							//テキストエリアに表示する
+							window.csvdata = reader.result;
+						}
+					});
+					$("#quest_self_loadcsv_button").click(function() {
+						var s_Data = window.csvdata;
+ 						if( s_Data ==""){
+							alert("Check your input!");
+							return;
+						}
+						$.post("/quest/self/upload",{
+							Data: s_Data
+						},
+						function(resdata, status) {
+							alert("Data: " + resdata + "\nStatus: " + status);
+							window.location.assign("/quest/self");
+						});
+					});
+					$("#quest_self_delete").click(function() {
+						var check = confirm("你在该小队下的所有需求将被删除，确认么？");
+						if(check){
+							$.get("/quest/self/delete",
+							function(resdata, status) {
+								alert("Data: " + resdata + "\nStatus: " + status);
+								window.location.assign("/quest/self");
+							});
+						}
+					});
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+			</script>
+		</div>
+	</body>
+
+</html>

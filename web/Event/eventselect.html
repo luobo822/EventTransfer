@@ -1,0 +1,156 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="eventselect">
+			<div data-role="header">
+				<h1>母港</h1>
+				<div data-role="button" class="ui-btn-left">
+					<a href="#battle_entry" data-role="button" data-theme="b" data-icon="gear">出撃</a>
+				</div>
+				<div data-role="button" class="ui-btn-right">
+					<a href="#edit_entry" data-role="button" data-theme="b" data-icon="gear">編成</a>
+				</div>
+			</div>
+			
+			<div data-role="panel" id="battle_entry" data-theme="b">
+				<h3>出撃海域</h3>
+				<div id="battle_entry_group" data-inline="true">
+				</div>
+			</div>
+
+			<div data-role="panel" id="edit_entry" data-theme="b" data-position="right">
+				<div id="edit_entry_group" data-inline="true">
+					<a class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">言語切替</a>
+					<a href="/public/eventinfo" target="_blank" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">情報広場</a>
+					<a href="/event" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">イベント管理</a>
+					<a href="/team" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">小隊管理</a>
+					<a href="/quest/view" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">任務構成</a>
+					<a id="eventselect_logout" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">ログアウト</a>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<p>SystemVersion 2.0.0.0.6<br />
+					1.团队需求列表现在可以表示物品需求数。<br />
+					2.复活了团队需求列表（分组）功能，设置好优先度即可出力包含各队员任务目标的列表。<br />
+					任務構成>查看团队需求列表（分组）<br />
+				<p>SystemVersion 2.0.0.0.5<br />
+					1.对应了个人CSV读入价格无法设置成「0」的不具合。<br />
+					2.对应了个人CSV读入SQL_FUTICTION主键采番不当造成的无法上传。<br />
+				<p>SystemVersion 2.0.0.0.4<br />
+					1.对应了存在完卖物品任务的再次提交时，完卖物品的数量计算已经状态判断的不具合。<br />
+					2.对应了由于客户端用已失效的cookies再次握手时造成的致命障碍。<br />
+				<p>SystemVersion 2.0.0.0.3<br />
+					1.增加新测试功能。「向妹妹祈祷」。成功后将收到若干提示。(测试中)<br />
+					攻击顺序>妹に祈る<br />
+					2.新增标记任务功能。被标记的任务进入前将弹出提示消息。<br />
+					本人或者管理员可以解除标记<br />
+					详细任务包>标记该任务<br />
+					详细任务包>解除该任务<br />
+				<p>SystemVersion 2.0.0.0.2<br />
+					<br />
+					1. 个人需求页面单独分离。<br />
+					2. CSV导入支持。<br />
+					具体请参照机能说明。<br />
+					<br />
+					格式式样:<br />
+					与本页面下载的个人CSV相同。但不含头部。<br />
+					UTF8,LF,大小5M以内。<br />
+					合并规则:<br />
+					社团位置、名称一致时将不再创建社团。<br />
+					在社团合并的基础上，物品名一致，价格一致的物品将被合并。<br />
+					TIPS:<br />
+					如果你并不想和他人合并社团，请向社团名添加一些你的识别符。<br />
+					同理物品也是一样。<br />
+					①任務構成>系统菜单>选择编辑活動<br />
+					②任務構成>系统菜单>查看个人需求>个人CSV读入<br />
+					<br />
+					3. 清理机能追加。<br />
+					①任務構成>系统菜单>系统导入>无人需求社团・物品删除<br />
+					②任務構成>系统菜单>查看个人需求>删除全部个人需求<br />
+				</p>
+				<p>SystemVersion 2.0.0.0.1<br />
+					<br />
+					1. UI更新。<br />
+					2. 现在可以自行创建小队。<br />
+					但是成员删除等操作请联系管理员。<br />
+					方法 : 编成>小队管理>系统菜单>创建队伍<br />
+					3. HTML5 Notification実装。<br />
+					サポート対象ブラウザは下記です。<br />
+					------------<br />
+					デスクトップ<br />
+					------------<br />
+					Chrome    ○<br />
+					Firefox   ○<br />
+					IE        ×<br />
+					------------<br />
+					モバイル    <br />
+					------------<br />
+					Chrome    ×<br />
+					Firefox   ○<br />
+				</p>
+			</div>
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+				
+					$.get("/team/view/plus",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					$("#eventselect_logout").click(function() {
+						window.location.assign("/logout");
+					});
+					
+					
+					var makeUI = function (resData) {
+						for (one in resData) {
+							$("#battle_entry_group").append('<a id="event' + one + '"class="ui-btn ui-btn-b ui-shadow" style="text-align:left; font-size:0.5em; ">'
+							+ resData[one].EventName
+							+ '<br>'
+							+ resData[one].TeamName 
+							+ '</a>');
+							makeClick(resData, one);
+						}
+					}
+					
+					var makeClick = function(resData,i) {
+						$("#event" + i).on( "vclick", function() {
+							$("#event" + i).prop("disabled", true);
+							$.post("/team/select", {
+									eventid : resData[i].EventID ,
+									teamid : resData[i].TeamID
+								},
+								function selectevent(resdata, status) {
+									//alert("Data: " + resdata + "\nStatus: " + status);
+									alert("您已成功选择活动: " + 
+									"\n" + resData[i].EventName +
+									"\n" + resData[i].EventOpenTime + " ~" + 
+									" " + resData[i].EventCloseTime +
+									"\n" + resData[i].EventLocation
+									);
+									$("#event" + i).prop("eabled", false);
+									window.location.assign("/");
+								}
+							);
+						});
+					}
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

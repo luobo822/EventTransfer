@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+
+		<div data-role="page" id="input_csv">
+			<div data-role="header">
+				<h1>导入CSV</h1>
+				<a id="buttonToBack" data-role="button" data-icon="back">返回</a>
+				<div data-role="button" class="ui-btn-right">
+				</div>
+			</div>
+
+			<div data-role="content">
+				<form>
+					<label for="csvFileInput">
+						<strong>CSV File:</strong>
+					</label>
+					<input type="file" id="csvFileInput" onchange="functionbody(this.files)" accept=".csv">
+				</form>
+				<center>～上传之前请转换为UTF-8编码上传,否则产生乱码!～</center>
+				<center>～请不要修改CSV文件的内容,直接上传即可!～</center>
+				<center>～建议使用chrome for windows～</center>
+				<br />
+
+				<div data-role="controlgroup" data-type="vertical">
+					<input type="button" id="upload_csv" value="上传">
+				</div>
+
+				<br />
+				<ul id="upload_result" data-role="listview" data-inset="true"></ul>
+				<script>
+					$("#buttonToBack").click(function() {
+						window.location.assign("/"); //防止页面样式错误;
+					});
+					$(function() {
+						//这里的文件解析模块的功能是：整理CSV格式，将行全部格式化成理想形态,并不参与csv的直接解析
+						window.functionbody = function handleFiles(files) {
+							window.csvdata = ""; //存储csv数据的一个全局变量。从read-csv.js里入栈。呈倒序排列
+							if (window.FileReader) {
+								getAsText(files[0]);
+							} else {
+								alert('FileReader are not supported in this browser.');
+							}
+						}
+
+						function getAsText(fileToRead) {
+							var reader = new FileReader();
+							// Handle errors load
+							reader.onload = loadHandler;
+							reader.onerror = errorHandler;
+							// Read file into memory as UTF-8      
+							reader.readAsText(fileToRead);
+						}
+
+						function loadHandler(event) {
+							var csv = event.target.result;
+							processData(csv);
+						}
+
+						function processData(csv) {
+							//suica mod 2015.7.31
+							console.log("解析开始");
+							csv = csv.replace(/'/g, "''")
+							var allTextLines = csv.split(/\r\n|\n/);
+							var lines = [];
+							while (allTextLines.length >= 2) {
+								var nowline = allTextLines.pop() + ',';
+								if (nowline.indexOf("Circle") != -1) { //说明此行正常
+									lines.push(nowline);
+								} else {
+									allTextLines[allTextLines.length - 1] = allTextLines[allTextLines.length - 1].concat(nowline);
+								}
+							}
+							console.log("解析结束");
+							get_result(lines);
+						}
+
+						function errorHandler(evt) {
+							if (evt.target.error.name == "NotReadableError") {
+								alert("无法解析此csv文件！");
+							}
+						}
+
+						function get_result(lines) {
+							window.csvdata = JSON.stringify(lines);
+							console.log(csvdata);
+						}
+						$("#upload_csv").click(function() {
+							var target = document.getElementById("csvFileInput").files[0].name.split(".")[0]; //解析出目标名
+							var r = confirm("是否确认为" + target + "上传CSV？");
+							if (r) { //确认
+								$("#upload_result").empty();
+								$.post("/csv_process", {
+										'data': csvdata,
+										'target_user': target
+									},
+									function print_result(resData, status) {
+										$("#upload_result").append("<center>" + resData + "</center>");
+									});
+							}
+						});
+
+					});
+				</script>
+
+			</div>
+
+		</div>
+	</body>
+
+</html>

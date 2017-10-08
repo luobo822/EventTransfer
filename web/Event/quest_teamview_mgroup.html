@@ -1,0 +1,37 @@
+﻿<!doctype html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="quest_teamview_mgroup">
+			<div data-role="header">
+				<h1>团队需求列表(分组)</h1>
+				<!-- 目標先は非jQueryMobile！ -->
+				<a id="quest_teamview_mgroup_buttonBack" data-role="button" data-icon="back">返回</a>
+			</div>
+
+			<div id="teamlistfile_mgroupHTML" role="main" class="ui-content">
+			</div>
+			
+			<script>
+				 //ajax跨域对应 End
+				$("#quest_teamview_mgroup_buttonBack").click(function() {
+					$.mobile.back();
+				});
+				$(document).on("pagecontainerchange", function() {
+					$.get("/quest/team_mgroup",
+						function make_UI(resData, status) {
+							$("#teamlistfile_mgroupHTML").html(resData);	
+						});
+				});
+			</script>
+		</div>
+	</body>
+
+</html>

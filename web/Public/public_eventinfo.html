@@ -1,0 +1,57 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<title>同人イベント情報</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="public_eventinfo">
+			<div data-role="header">
+				<h1>同人イベント情報</h1>
+				<a href="#public_eventinfo_panel" id="public_eventinfo_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+			</div>
+			
+			<div data-role="panel" id="public_eventinfo_panel" data-theme="b">
+				<div id="public_menuinfo_group" data-role="controlgroup" class="ui-controlgroup">
+					<a href="#" id="public_eventinfo_back" class="ui-btn ui-corner-all" style="text-align:left; ">返回广场</a>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<div>热门关键词</div>
+				<ul id="eventinfoArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="搜索"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					$.get("/public/event/select",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					var makeUI = function (resData) {
+						$("#eventinfo").text('');
+						for(one in resData){
+							$("#eventinfoArea").append('<li><a href="/public/menuinfo?EventID='
+								+ resData[one].EventID + '"'
+								+ '" target="_blank" class="ui-btn" data-inline="true" style="text-align:left; ">'
+								+ "イベント名 :   " + resData[one].EventName
+								+ "<br>開催日程   : " + resData[one].EventID.replace(/..$/,"")
+								+ "<br>開催場所   : " + resData[one].EventLocation
+								+ "<br>開催時間   : " + resData[one].EventOpenTime
+								+ "～" + resData[one].EventCloseTime
+								+ '</a><li>');
+						}
+					}
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+			</script>
+		</div>
+	</body>
+
+</html>

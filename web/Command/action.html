@@ -1,0 +1,191 @@
+﻿<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<title>详细指挥页面</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="actionPage">
+			<div id="actionPageTitle" data-role="header">
+				<a id="buttonToCommand" data-role="button" data-icon="back">返回</a>
+				<div data-role="button" class="ui-btn-right">
+					<input type="button" id="save" value="紧急对应" data-icon="alert">
+				</div>
+				<h1>详细指挥页面</h1>
+			</div>
+
+			<div role="main" class="ui-content">
+				<select name="select-choice-fighter" id="select-choice-fighter">
+				</select>
+				<div id="fighterInfo" class="ui-content">Loading...</div>
+				<div id="commandStr" class="ui-content">这里将会显示指挥用字符串!!!</div>
+				<div data-role="fieldcontain" id="sendLock">
+					<label for="flip-sendLock">任务分发确认</label>
+					<select name="flip-sendLock" id="flip-sendLock" data-role="slider">
+						<option value="on">上锁</option>
+						<option value="off">解锁</option>
+					</select>
+				</div>
+				<div class="ui-content">
+					<input type="Button" id="putMission" value="分发任务" disabled />
+				</div>
+				<div id="circleInfo" class="ui-content">Loading...</div>
+				<div data-role="fieldcontain" id="resetLock">
+					<label for="flip-resetLock">重置确认</label>
+					<select name="flip-resetLock" id="flip-resetLock" data-role="slider">
+						<option value="on">上锁</option>
+						<option value="off">解锁</option>
+					</select>
+				</div>
+				<div class="ui-content">
+					<input type="Button" id="reset" value="重置该社团" />
+				</div>
+				<div data-role="fieldcontain" id="giveupLock">
+					<label for="flip-giveupLock">放弃确认</label>
+					<select name="flip-giveuptLock" id="flip-giveupLock" data-role="slider">
+						<option value="on">上锁</option>
+						<option value="off">解锁</option>
+					</select>
+				</div>
+				<div class="ui-content">
+					<input type="Button" id="giveupMission" value="放弃该社团" />
+				</div>
+			</div>
+
+			<script>
+				//ajax跨域对应 Start
+				$.ajaxSetup({xhrFields:{withCredentials:true}});
+				//ajax跨域对应 End
+				$(document).on("pagecontainerchange", function() {
+					$("#buttonToCommand").click(function() {
+						$.mobile.back();
+					});
+					var pCircleID = getParam("CircleID");
+					var pCircleName = getParam("CircleName");
+					var pCircleLocation = getParam("CircleLocation");
+					var mission = {
+						CircleID : pCircleID,
+						CircleLocation : pCircleLocation,
+						CircleName : pCircleName
+					}
+					//console.log("CircleID: " + getParam("CircleLocation"));
+					$("#circleInfo").html('<br>目标サークルID: ' + pCircleID  + '</br>' + '目標サークル位置: ' + pCircleLocation + '</br>' + '目標サークル名: ' + pCircleName);
+					$("#reset").click(function() {
+						if ( $("#flip-resetLock").val() == "off" ) {
+							$("#reset").button("disable");
+							$.post("/circle_reset", {
+									CircleID : pCircleID,
+									CircleLocation : pCircleLocation,
+									CircleName : pCircleName
+								},
+								function(data, status) {
+									alert("Data: " + data + "\nStatus: " + status);
+									window.location.assign("/command");
+									//$.mobile.changePage("/command");
+							});
+						}
+					});
+					$("#putMission").click(function() {
+						if ( $("#flip-sendLock").val() == "off" ) {
+							$("#putMission").button("disable");
+							$.post("/task_add", {
+									CircleID : pCircleID,
+									CircleLocation : pCircleLocation,
+									CircleName : pCircleName,
+									FighterID : $("#select-choice-fighter").val(),
+									Fighter : $("#select-choice-fighter").find("option:selected").text()
+								},
+								function(data, status) {
+									alert("Data: " + data + "\nStatus: " + status);
+							});
+						}
+					});
+					$("#giveupMission").click(function() {
+						if ( $("#flip-giveupLock").val() == "off" ) {
+							$("#giveupMission").button("disable");
+							$.post("/quest_giveup", {
+									CircleID : pCircleID,
+									CircleLocation : pCircleLocation,
+									CircleName : pCircleName
+								},
+								function(data, status) {
+									alert("Data: " + data + "\nStatus: " + status);
+									window.location.assign("/command");
+							});
+						}
+					});
+
+					$.get("/fighter_list", 
+						function(resData, status) {
+						for (var i = 0; i < resData.length; i++) {
+							//console.log("Data: " + resData + "\nStatus: " + status);
+							makeSelect(resData[i]);
+							$("#select-choice-fighter").selectmenu('refresh',true);
+							makeConmmandStr(mission);
+							$("#putMission").button("enable");
+						}
+					});
+
+					$.post("/fighter_on", {
+							CircleID: pCircleID
+						},
+						function(resData, status) {
+							var fighter = "以下战士任务列表里存在该任务:\n";
+							if ( resData[0] ) {
+								for (var i = 0; i < resData.length; i++) {
+									//console.log("Data: " + resData + "\nStatus: " + status);
+									fighter = fighter + "【" + resData[i].UserNickName + "】";
+								}
+							}
+							
+							$("#fighterInfo").html(fighter);  
+					});
+					
+					$("#select-choice-fighter").change(function() {
+						makeConmmandStr(mission);
+					});
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+				
+				var makeConmmandStr = function(mission) {
+					var cStr = "请战士: " + $("#select-choice-fighter").find("option:selected").text() + "<br>" +
+					"前往: 目标サークルID: " + mission.CircleID + "<br>" +
+					"目標サークル位置: " + mission.CircleLocation + "<br>" +
+					"目標サークル名: " + mission.CircleName + "<br>" +
+					"与敌人交战！" + "<br>" +
+					"详细购买数量请以系统提示为准！" + "<br>" +
+					//整合对应要点:链接地址替换
+					"系统链接地址:http://nodejs-eventtransfer.rhcloud.com/package?CircleID=" + mission.CircleID;
+					$("#commandStr").html(cStr);  
+				}
+				
+				var getParam = function(key) {
+					var url = decodeURIComponent(location.href);
+					parameters = url.split("?");
+					params = parameters[1].split("&");
+					var paramsArray = [];
+					for (i = 0; i < params.length; i++) {
+						neet = params[i].split("=");
+						paramsArray.push(neet[0]);
+						paramsArray[neet[0]] = neet[1];
+					}
+					var categoryKey = paramsArray[key];
+					return categoryKey;
+				}
+
+				var makeSelect = function(fighterCollection) {
+					$("#select-choice-fighter").append('<option value="' + fighterCollection.UserID + '">'+ fighterCollection.UserNickName +'</option>');
+				}
+			</script>
+
+		</div>
+	</body>
+
+</html>

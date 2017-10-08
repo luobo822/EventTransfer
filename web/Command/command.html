@@ -1,0 +1,83 @@
+﻿<!doctype html>
+<html lang="en">
+
+	<head>
+		<title>指挥官操作页面</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+	
+	<head>
+	    
+	</head>
+
+	<body>
+		<div data-role="page" id="commandPage">
+			<div data-role="header">
+				<h1>指挥官操作页面</h1>
+				<a id="buttonToBack" data-role="button" data-icon="back">返回</a>
+			</div>
+
+			<div role="main" class="ui-content">
+				<ul id="command" data-role="listview" data-filter="true" data-inset="true">
+				</ul>
+			</div>
+			<script>
+				//ajax跨域对应 Start
+				$.ajaxSetup({xhrFields:{withCredentials:true}});
+				//ajax跨域对应 End
+				$(document).on("pagecontainerchange", function() {
+					$("#buttonToBack").click(function() {
+						//$.mobile.back();
+						window.location.assign("/"); //防止页面样式错误;
+					});
+					$.get("/quest_info",
+						function(resData, status) {
+							console.log("Data: " + resData + "\nStatus: " + status);
+							makeUI(resData);
+						});
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+				var makeUI = function(resData) {
+					console.log("resData: " + resData);
+					for (var i = 0; i < resData.length; i++) {
+						$("#command").append('<li id="commandList' + i + '"></li>');
+						$("#commandList" + i).append('<a id="commandListInfo' + i + '"></a>');
+						$("#commandListInfo" + i).append('<p id="commandListLocation' + i + '"><strong>' + resData[i].CircleLocation + '</strong></p>');
+						$("#commandListInfo" + i).append('<p id="commandListName' + i + '"><strong>' + resData[i].CircleName + '</strong></p>');
+						$("#commandListInfo" + i).append('<p id="commandListName' + i + '"><strong>战况 :' + battleStatus(resData[i].CircleStatus) + '</strong></p>');
+						$("#commandListInfo" + i).append('<p id="commandListText' + i + '">点击以分发任务或重置该社团信息</p>');
+						$("#command").listview('refresh');
+						makeClick(resData, i);
+					}
+				}
+				var makeClick = function(resData, long) {
+					$("#commandListInfo" + long).click(function() {
+						$.mobile.changePage("/action", {
+							data: resData[long]
+						});
+					});
+					
+				}
+				var battleStatus = function(status) {
+					if ( status == 'ST' ) {
+						return '【未完成】好戏开场啦';
+					} else if  ( status == 'ON' ) {
+						return '【未完成・进行中】再来一炮他们就要完蛋';
+					} else if  ( status == 'FI' ) {
+						return '【已完成】目标消失，寻找下一个目标';
+					} else if  ( status == 'GV' ) {
+						return '【未完成・已完成】陡壁指挥官放弃了该任务';
+					} else {
+						return '【未完成・已完成】异常请联系管理员';
+					}
+				}
+			</script>
+		</div>
+	</body>
+
+</html>

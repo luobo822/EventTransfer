@@ -1,0 +1,374 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="quest_goods">
+			<div data-role="header">
+				<h1>社团颁布物一览</h1>
+				<a href="#quest_goods_panel" id="goods_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+				<a id="buttonToCircle" data-role="button" data-icon="home">返回</a>
+			</div>
+			
+			<div data-role="panel" id="quest_goods_panel" data-theme="b">
+				<div id="goodsbuttongroup" data-role="controlgroup" class="ui-controlgroup">
+					<a href="#creat_good" id="quest_event" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">新增物品</a>
+					<a id="quest_task_add" class="ui-btn ui-corner-all" style="text-align:left; ">设置优先目标</a>
+					<a href="#quest_task_addm_pop" id="quest_task_add_m" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">为队员设置优先目标</a>
+					<a href="#edit_circle" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">修改社团信息</a>
+					<a href="#circle_unuseful" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">冻结社团</a>
+					<a href="#circle_delete" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">删除社团</a>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="creat_good" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>添加一个新的颁布物</h3>
+					<label for="goodsname">物品名:</label>
+					<input type="text" name="goodsname" id="goodsname" value="" data-theme="a" required>
+					<label for="goodsprice">价格:</label>
+					<input type="number" name="goodsprice" id="goodsprice" value="0" pattern="[0-9]" min="0" max="100000" data-theme="a" required>
+					<button id="create_goods_button" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">创建</button>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="edit_circle" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>修改社团信息</h3>
+					<label for="quest_goods_circlelocation">社团配置:</label>
+					<input type="text" name="quest_goods_circlelocation" id="quest_goods_circlelocation" value="" data-theme="a" required>
+					<label for="quest_goods_circlename">社团名:</label>
+					<input type="text" name="quest_goods_circlename" id="quest_goods_circlename" value="" data-theme="a" required>
+					<label for="quest_goods_circleweb">关联WEB:</label>
+					<input type="url" name="quest_goods_circleweb" id="quest_goods_circleweb" value="http://" pattern="^https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+$" data-theme="a" required>
+					<button id="edit_circle_button" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">确定</button>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="circle_unuseful" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>冻结社团</h3>
+					<button id="circle_unuseful_button" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">确定</button>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="circle_delete" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>删除社团</h3>
+					<button id="circle_delete_button" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">确定</button>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="quest_task_addm_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>选择操作</h3>
+					<div id="quest_task_addm_Area">
+						<label for="select-member" class="select">选择对象队员:</label>
+						<select name="select-member" id="select-member" data-mini="true">
+						</select>
+						<input type="Button" id="quest_task_addm_do" value="分发任务" disabled />
+					</div>
+				</div>
+			</div>
+			<div role="main" class="ui-content">
+				<div id="quest_goods_circleinfo" style="padding:0px 20px;"><h4>LOADING...</h4></div>
+				<div id="quest_goods_circleweblink" style="padding:0px 20px;"><h4>LOADING...</h4></div>
+				<ul id="goodsArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="输入检索字符以过滤物品"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var originalurl = location.href;
+					var isNull = function(CheckNum){
+						if ( CheckNum == "" ) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+					var isInt = function(CheckNum){
+						if ( CheckNum.match(/^[0-9]+$/) ) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+					var isURL = function(CheckNum){
+						if ( CheckNum.match(/^https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+$/) ) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				
+					$("#buttonToCircle").click(function() {
+						window.location.assign("/quest/view");
+					});
+					
+					var getParam = function(key) {
+						var url = decodeURI(originalurl);
+						parameters = url.split("?");
+						params = parameters[1].split("&");
+						var paramsArray = [];
+						for (i = 0; i < params.length; i++) {
+							neet = params[i].split("=");
+							paramsArray.push(neet[0]);
+							paramsArray[neet[0]] = neet[1];
+						}
+						var categoryKey = paramsArray[key];
+						return categoryKey;
+					}
+					
+					var s_circleid = getParam("CircleID");
+					//console.log(getParam("CircleLocation"));
+					//console.log(getParam("CircleName"));
+					
+					
+					$.get("/fighter_list", 
+						function(resData, status) {
+						for (var i = 0; i < resData.length; i++) {
+							makeSelect(resData[i]);
+							$("#select-member").selectmenu('refresh',true);
+						}
+						$("#quest_task_addm_do").button("enable");
+						$("#quest_task_addm_do").click(function() {
+							$.post("/quest/task/add",{
+								circleid : s_circleid ,
+								targetid : $("#select-member").val()
+							},
+							function(resData, status) {
+								alert("Data: " + resData + "\nStatus: " + status);
+							});
+						});
+					});
+					
+					var makeSelect = function(fighterCollection) {
+						$("#select-member").append('<option value="' + fighterCollection.UserID + '">'+ fighterCollection.UserNickName +'</option>');
+					}
+					
+					$("#quest_task_add").click(function() {
+						$.post("/quest/task/add",{
+							circleid : s_circleid
+						},
+						function(resData, status) {
+							alert("Data: " + resData + "\nStatus: " + status);
+						});
+					});
+					
+					$.post("/quest/circle/goods",{
+							circleid : s_circleid
+						},
+						function(resData, status) {
+							$("#quest_goods_circleinfo").html('<h4>' + resData[0][0].CircleLocation + '  ' + resData[0][0].CircleName + '</h4>');
+							$("#quest_goods_circleweblink").html('<a href="' + resData[0][0].CircleWeb
+								+ '" target="view_window" class="ui-btn ui-corner-all ui-first-child">' + resData[0][0].CircleWeb + '</a>');
+							$("#quest_goods_circlelocation").val(resData[0][0].CircleLocation);
+							$("#quest_goods_circlename").val(resData[0][0].CircleName);
+							$("#quest_goods_circleweb").val(resData[0][0].CircleWeb);
+							
+							$("#edit_circle_button").click(function() {
+								var s_circlelocation = $("#quest_goods_circlelocation").val();
+								var s_circlename = $("#quest_goods_circlename").val();
+								var s_circleweb = $("#quest_goods_circleweb").val();
+								if ( isNull(s_circlelocation) ||
+										isNull(s_circlename) ||
+										!isURL(s_circleweb) ) {
+										alert("Check your input!");
+										return false;
+								} else if ( s_circlelocation != resData[0][0].CircleLocation ||
+											s_circlename != resData[0][0].CircleName ||
+											s_circleweb != resData[0][0].CircleWeb ) {
+											$.post("/quest/circle/update",{
+												circleid : s_circleid ,
+												circlelocation : s_circlelocation.replace(/'/g,"’") ,
+												circlename : s_circlename.replace(/'/g,"’") ,
+												circleweb : s_circleweb.replace(/'/g,"’") ,
+												version : resData[0][0].Version ,
+												updatetime : resData[0][0].UpdateTime ,
+												createtime : resData[0][0].CreateTime 
+											},
+											function(resData, status) {
+												//alert("Data: " + resData + "\nStatus: " + status);
+												window.location.assign(originalurl);
+											});
+								} else {
+									return false;
+								}
+								
+							});
+							
+							$("#circle_unuseful_button").click(function() {
+								var check = confirm("冻结将使得其他人无法需求该社团。\n确定要冻结么？");
+							});
+							
+							$("#circle_delete_button").click(function() {
+								var check = confirm("只有在没有其他人需求或者身为团长时才能删除。\n删除后将无法恢复！确定要删除么？");
+								if ( check ) {
+									$.post("/quest/circle/delete",{
+										circleid : s_circleid ,
+										version : resData[0][0].Version ,
+										updatetime : resData[0][0].UpdateTime ,
+										createtime : resData[0][0].CreateTime 
+									},
+									function(resData, status) {
+										alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign("/quest/view");
+									});
+								}
+							});
+							makeUI(resData[1]);
+					});
+					
+					
+					var makeUI = function (resData) {
+						for (var i = 0; i < resData.length; i++) {
+							$("#goodsArea").append('<a href="#gbtnp' + i + '" id="gbtn' + i + '" data-rel="popup" class="ui-btn">'
+								+ "物品名 : " + resData[i].GoodsName
+								+ " <br>"
+								+ "价格 : " + resData[i].GoodsPrice
+								+ " <br>"
+								+ "我的需求 : " + resData[i].MyNum
+								+ " 总需求 : " + resData[i].TotalNum
+								+ '</a>'
+								+ '<div data-role="popup" id="gbtnp' + i + '" class="goods_popup"'
+								+ ' data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">'
+								+     '<button id="gbtnsu_delbutton' + i + '" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">删除该物品</button>'
+								+     '<div id="gbtnsub' + i + '" style="padding:0px 5px;">'
+								+          '<label for="gbtnsu_goodsname' + i + '">物品名:</label>'
+								+          '<input type="text" name="GoodsName" id="gbtnsu_goodsname' + i + '" value="' + resData[i].GoodsName
+								+          '" data-theme="a" class="gbtnp_input" required>'
+								+          '<label for="gbtnsu_goodsprice' + i + '">价格:</label>'
+								+          '<input type="number" name="GoodsPrice" id="gbtnsu_goodsprice' + i + '" value="' + resData[i].GoodsPrice
+								+          '" pattern="[0-9]" min="0" max="100000" data-theme="a" class="gbtnp_input" required>'
+								+          '<label for="gbtnsu_goodsquest' + i + '">我的需求:</label>'
+								+          '<input type="number" name="Request" id="gbtnsu_goodsquest' + i + '" value="' + resData[i].MyNum
+								+          '" pattern="[0-9]" min="0" max="20" data-theme="a" class="gbtnp_input" required>'
+								+          '<button id="gbtnsu_button' + i + '" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">确定</button>'
+								+     '</div>'
+								+ '</div>');
+							makeeventClick(resData[i], i);
+						}
+						$(".gbtnp_input").textinput();
+						$(".goods_popup").popup();
+					}
+					
+					var makeeventClick = function(resData, i) {
+						
+						$("#gbtnsu_delbutton" + i).click(function() {
+							var check = confirm("只有在没有其他人需求或者身为团长时才能删除。\n删除后将无法恢复！确定要删除么？");
+							if ( check ) {
+								$.post("/quest/circle/goods/delete",{
+									circleid : s_circleid ,
+									goodsid : resData.GoodsID ,
+									version : resData.Version ,
+									updatetime : resData.UpdateTime ,
+									createtime : resData.CreateTime
+								},
+								function(resData, status) {
+									alert("Data: " + resData + "\nStatus: " + status);
+									window.location.assign(originalurl);
+								});
+							}
+						});
+						
+						$("#gbtnsu_button" + i).click(function() {
+							if ( !isInt( $("#gbtnsu_goodsprice" + i).val() ) ||
+									!isInt( $("#gbtnsu_goodsquest" + i).val() ) ) {
+									alert("Check your input!");
+									return false;
+							}
+							
+							var post_data = {
+								circleid : s_circleid ,
+								goodsid : resData.GoodsID ,
+								goodsname : $("#gbtnsu_goodsname" + i).val() ,
+								goodsprice : $("#gbtnsu_goodsprice" + i).val() ,
+								goodsquest : $("#gbtnsu_goodsquest" + i).val() ,
+								version : resData.Version ,
+								updatetime : resData.UpdateTime ,
+								createtime : resData.CreateTime
+							};
+							
+							if ( ( post_data.goodsname != resData.GoodsName ||
+								post_data.goodsprice != resData.GoodsPrice ) ||
+								post_data.goodsquest != resData.MyNum ) {
+							
+								if ( post_data.goodsname != resData.GoodsName ||
+									post_data.goodsprice != resData.GoodsPrice) {
+								
+									$.post("/quest/circle/goods/update",{
+										circleid : post_data.circleid ,
+										goodsid : post_data.goodsid ,
+										goodsname : post_data.goodsname.replace(/'/g,"’") ,
+										goodsprice : post_data.goodsprice ,
+										version : post_data.version ,
+										updatetime : post_data.updatetime ,
+										createtime : post_data.createtime 
+									},
+									function(resData, status) {
+										//alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign(originalurl);
+									});
+								}
+								
+								if ( post_data.goodsquest != resData.MyNum ) {
+								
+									$.post("/quest/circle/goods/request",{
+										circleid : post_data.circleid ,
+										goodsid : post_data.goodsid ,
+										goodsquest : post_data.goodsquest
+									},
+									function(resData, status) {
+										//alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign(originalurl);
+									});
+								}
+							} else {
+								return false;
+							}
+						});
+					}
+					
+					$("#create_goods_button").click(function() {
+						var s_goodsname = $("#goodsname").val();
+						var s_goodsprice = $("#goodsprice").val();
+						
+						if ( !isInt(s_goodsprice) ) {
+								alert("Check your input!");
+								return false;
+						}
+						
+						$.post("/quest/circle/goods/create",{
+							circleid : s_circleid ,
+							goodsname : s_goodsname.replace(/'/g,"’") ,
+							goodsprice : s_goodsprice 
+						},
+						function(resData, status) {
+							//alert("Data: " + resData + "\nStatus: " + status);
+							window.location.assign(originalurl);
+						});
+					});
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

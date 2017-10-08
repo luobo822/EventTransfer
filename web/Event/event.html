@@ -1,0 +1,109 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="event_view">
+			<div data-role="header">
+				<h1>已登录的活动</h1>
+				<a id="buttonToIndex" data-role="button" data-icon="home">返回</a>
+			</div>
+			
+			<div id="eventbuttongroup" data-role="controlgroup" data-type="horizontal" class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+				<div class="ui-controlgroup-controls ">
+					<a href="#createvent" data-rel="popup" class="ui-btn ui-corner-all ui-first-child">申请添加活动</a>
+					<a href="#" class="ui-btn ui-corner-all">施工中</a>
+					<a href="#resaultview" data-rel="popup" class="ui-btn ui-corner-all ui-last-child">查看申请结果</a>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="createvent" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:10px 20px;">
+					<form>
+						<h3>申请添加活动</h3>
+						<label for="eventname">活动名:</label>
+						<input type="text" name="eventname" id="eventname" value="" data-theme="a">
+						<label for="eventname">开始时间:</label>
+						<input type="text" name="eventopentime" id="eventopentime" value="" data-theme="a">
+						<label for="eventname">结束时间:</label>
+						<input type="text" name="eventclosetime" id="eventclosetime" value="" data-theme="a">
+						<label for="eventname">地点:</label>
+						<input type="text" name="eventlocation" id="eventlocation" value="" data-theme="a">
+					</form>
+					<button data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">创建</button>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="resaultview" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:10px 20px;">
+					<form>
+						<h3>申请结果</h3>
+						<label for="resault">结果:</label>
+						<input type="text" name="resault" id="resault" value="" data-theme="a">
+					</form>
+				</div>
+			</div>
+
+			<div role="main" class="ui-content">
+				<ul id="eventArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="已登录的活动"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					$.get("/event/view",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					
+					$("#buttonToIndex").click(function() {
+						window.location.assign("/eventselect");
+					});
+					
+					
+					var makeUI = function (resData) {
+						for (var i = 0; i < resData.length; i++) {
+							$("#eventArea").append('<a href="#' + resData[i].EventID + '" data-rel="popup" class="ui-btn">'
+								+ "活动ID:" + resData[i].EventID
+								+ "<br>"
+								+ " 活动:" + resData[i].EventName 
+								+ "<br>"
+								+ " 开始时间:" + resData[i].EventOpenTime
+								+ " 结束时间:" + resData[i].EventCloseTime
+								+ "<br>"
+								+ " 地点:" + resData[i].EventLocation
+								+ " 活动可用:" + resData[i].EventIsAlive
+								+ '</a>'
+								+ '<div data-role="popup" id="' + resData[i].EventID
+								+ '" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">'
+								+     '<div id="sub' + resData[i].EventID + '" style="padding:10px 20px;">'
+								+     '活动详细'
+								+     '</div>'
+								+ '</div>');
+							$("#" + resData[i].EventID).popup();
+							//makeClick(resData, i);
+						}
+					}
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

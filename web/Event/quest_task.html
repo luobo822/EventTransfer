@@ -1,0 +1,146 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="quest_task">
+			<div data-role="header">
+				<h1>优先度一览</h1>
+				<a href="#quest_task_panel" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+				<a id="buttonToQuest" data-role="button" data-icon="home">返回</a>
+			</div>
+			
+			<div data-role="panel" id="quest_task_panel" data-theme="b">
+				<div id="taskbuttongroup" data-inline="true">
+				</div>
+			</div>
+
+			<div data-role="panel" id="member_task_panel" data-theme="b" data-position="right">
+				<h3>攻击顺序</h3>
+				<div id="membertask_group" data-inline="true">
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<ul id="memberArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="输入检索队员昵称"></ul>
+			</div>
+			
+			<div data-role="popup" id="membertask_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>选择操作</h3>
+					<div id="membertask_Area">
+						<a id="task_delete" class="ui-btn">删除该目标</a>
+						<label for="select-task" class="select">选择优先度(1为最高):</label>
+						<select name="select-task" id="select-task" data-mini="true">
+						  <option value="1">1</option>
+						  <option value="2">2</option>
+						  <option value="3">3</option>
+						  <option value="4">4</option>
+						  <option value="5">5</option>
+						  <option value="6">6</option>
+						  <option value="7">7</option>
+						  <option value="8">8</option>
+						  <option value="9">9</option>
+						</select>
+						<a href="#" id="task_change" class="ui-btn">设置优先度</a>
+					</div>
+				</div>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var originalurl = location.href;
+					
+					$.get("/team/member/view",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					
+					$("#buttonToQuest").click(function() {
+						window.location.assign("/quest/view");
+					});
+					
+					
+					var makeUI = function (resData) {
+						for (one in resData) {
+							$("#memberArea").append('<a href="#member_task_panel" id="member' + resData[one].UserID +  '" class="ui-btn">'
+								+ resData[one].UserNickName
+							+ '</a>');
+							makeClick(resData[one], resData[one].UserID);
+						}
+					}
+					
+					var makeClick = function (resData, UserID) {
+						$("#member" + UserID).click(function() {
+							$("#membertask_group").text('');
+							$.post("/quest/task",{
+									targetid : UserID
+								},
+								function(resData, status) {
+									for ( one in resData ){
+										$("#membertask_group").append('<a href="#membertask_pop" id="task_pop'+ one +'" data-rel="popup" class="ui-btn">'
+										+ "[" + resData[one].Level + "]"
+										+ resData[one].CircleLocation + " " + resData[one].CircleName + '</a>');
+										makePopClick(resData, one);
+									}
+							});
+						});
+					}
+					
+					var makePopClick = function (resData, one) {
+						$("#task_pop"+ one).click(function() {
+							$("#task_delete").unbind("click");
+							$("#task_change").unbind("click");
+							$("#task_delete").click(function() {
+								var check = confirm("Are you sure？");
+								if(check){
+									$.post("/quest/task/delete",{
+											targetid : resData[one].UserID ,
+											circleid : resData[one].CircleID
+										},
+										function(resData, status) {
+										//do sometings
+										$("#membertask_pop").popup("close");
+										$("#member_task_panel").panel("close");
+									});
+								}
+							});
+							$("#task_change").click(function() {
+								$.post("/quest/task/update",{
+										targetid : resData[one].UserID ,
+										circleid : resData[one].CircleID ,
+										level : $("#select-task").val()
+									},
+									function(resData, status) {
+										//do sometings
+										$("#membertask_pop").popup("close");
+										$("#member_task_panel").panel("close");
+								});
+							});
+						});
+					}
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="http://www.francescomalagrino.com/BootstrapPageGenerator/3/js/jquery-ui"></script>
+<link href="http://www.francescomalagrino.com/BootstrapPageGenerator/3/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="http://www.francescomalagrino.com/BootstrapPageGenerator/3/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			<h3>
+				指挥中心监视屏幕
+			</h3>
+			<div class="btn-group">
+				 <button class="btn" type="button" id="buttonToBack">返回首页</button>
+				 <button class="btn" type="button" id="buttonrefresh">刷新</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span3">
+			<table class="table" id="cicrleT">
+				<thead>
+					<tr>
+						<th>
+							位置
+						</th>
+						<th>
+							社团名
+						</th>
+						<th>
+							社团状态
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		<div class="span4">
+			<table class="table" id="goodsT">
+				<thead>
+					<tr>
+						<th>
+							位置
+						</th>
+						<th>
+							物品名
+						</th>
+						<th>
+							物品价格
+						</th>
+						<th>
+							物品状态
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		<div class="span1">
+			<table class="table" id="memberT">
+				<thead>
+					<tr>
+						<th>
+							队员名
+						</th>
+						<th>
+							位置
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		<div class="span4">
+			<table class="table" id="logT">
+				<thead>
+					<tr>
+						<th>
+							日志编号
+						</th>
+						<th>
+							日志简要
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<script>
+	//$(document).on("pagecontainerchange", function() {
+	$("#buttonToBack").click(function() {
+		window.location.assign("/"); //防止页面样式错误;
+	});
+	$("#buttonrefresh").click(function() {
+		window.location.reload();
+	});
+	$(document).ready(function() {
+		$.get("/status_screen",
+				function(resData, status) {
+					var ciclelist = resData[0];
+					var goodslist = resData[1];
+					var memberlist = resData[2];
+					var loglist = resData[3];
+					
+					for ( one in ciclelist ) {
+						$("table#cicrleT tbody").append('<tr class="success"><td>' + ciclelist[one].CircleLocation
+														 + '</td><td>' + ciclelist[one].CircleName
+														  + '</td><td>' + ciclelist[one].CircleStatus +'</td></tr>');
+					}
+					for ( one in goodslist ) {
+						$("table#goodsT tbody").append('<tr class="success"><td>' + goodslist[one].CircleLocation
+														+ '</td><td>' + goodslist[one].GoodsName
+														 + '</td><td>' + goodslist[one].GoodsPrice
+														 + '</td><td>' + goodslist[one].GoodsStatus + '</td></tr>');
+					}
+					for ( one in memberlist ) {
+						$("table#memberT tbody").append('<tr class="success"><td>' + memberlist[one].UserName
+														+ '</td><td>' + memberlist[one].CircleLocation + '</td></tr>');
+					}
+					for ( one in loglist ) {
+						$("table#logT tbody").append('<tr class="success"><td>' + loglist[one].MessageNo
+														+ '</td><td>' + loglist[one].Info + '</td></tr>');
+					}
+		
+		});
+	});
+</script>
+</body>
+</html>

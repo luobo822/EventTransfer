@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+
+		<div data-role="page" id="shime">
+			<div data-role="header">
+				<h1>締め処理</h1>
+				<a id="buttonToBack" data-role="button" data-icon="back">返回</a>
+				<div data-role="button" class="ui-btn-right">
+				</div>
+			</div>
+
+			<div data-role="content">
+				<center>操作流程</center>
+				<center>1.确认一切IF入力完成后点击最终采番</center>
+				<center>2.然后点击第一轮截止 第一轮截止完成</center>
+				<center>3.第一轮截止后 团队任务单中可以看到任务</center>
+				<center>4.确认没有要微修正的之后击最终截止</center>
+				<center>5.最终截止完成后信息将导入前台作战系统</center>
+				<br />
+
+				<div data-role="controlgroup" data-type="vertical">
+					<input type="button" id="las_setnum" value="最终采番">
+					<input type="button" id="first_shime" value="第一轮截止">
+					<input type="button" id="teamlist" value="团队任务单">
+					<input type="button" id="last_shime" value="最终截止">
+				</div>
+				<ul id="upload_result" data-role="listview" data-inset="true"></ul>
+				<script>
+					$("#buttonToBack").click(function() {
+						window.location.assign("/"); //防止页面样式错误;
+					});
+					$(document).on("pagecontainerchange", function() {
+						$("#las_setnum").click(function() {
+							$("#las_setnum").prop("disabled", true);
+							var r = confirm("确认开始最终采番?");
+							if (r) {
+								$.get("/eventshime_setid", function print_result(resData, status) {
+									$("#upload_result").append("<center>" + resData + "</center>");
+									$("#las_setnum").prop("disabled", false);
+								});
+							} else {
+								$("#las_setnum").prop("disabled", false);
+							}
+						});
+						
+						$("#first_shime").click(function() {
+							$("#first_shime").prop("disabled", true);
+							var r = confirm("确认开始第一轮截止?");
+							if (r) {
+								$.get("/eventshime_1st", function print_result(resData, status) {
+									$("#upload_result").append("<center>" + resData + "</center>");
+									$("#first_shime").prop("disabled", false);
+								});
+							} else {
+								$("#first_shime").prop("disabled", false);
+							}
+						});
+						
+						$("#teamlist").click(function() {
+							$.mobile.changePage("/teamlistfile");
+						});
+						
+						$("#last_shime").click(function() {
+							$("#last_shime").prop("disabled", true);
+							var r = confirm("确认开始最终截止?");
+							if (r) {
+								$.get("/eventshime_last", function print_result(resData, status) {
+									$("#upload_result").append("<center>" + resData + "</center>");
+									$("#last_shime").prop("disabled", false);
+								});
+							} else {
+								$("#last_shime").prop("disabled", false);
+							}
+						});
+
+					});
+				</script>
+
+			</div>
+
+		</div>
+	</body>
+
+</html>

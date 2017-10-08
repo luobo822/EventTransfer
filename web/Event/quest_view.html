@@ -1,0 +1,225 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="quest_view">
+			<div data-role="header">
+				<h1>队伍需求一览</h1>
+				<a href="#quest_view_panel" id="quest_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+				<a id="buttonToIndex" data-role="button" data-icon="home">返回</a>
+			</div>
+			
+			<div data-role="panel" id="quest_view_panel" data-theme="b">
+				<div id="questbuttongroup" data-inline="true">
+					<a href="#quest_eventview" id="quest_event" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">选择编辑活动</a>
+					<a href="/quest/task" class="ui-btn ui-corner-all" style="text-align:left; ">编辑优先度</a>
+					<a href="#quest_control" data-rel="popup" data-position-to="#quest_event" class="ui-btn" style="text-align:left; ">系统导入</a>
+					<a href="/quest/self" class="ui-btn ui-corner-all" style="text-align:left; ">查看个人需求列表</a>
+					<a href="#quest_teamview" id="quest_team" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">查看团队需求列表</a>
+					<a href="#quest_team_mgroup" id="quest_team_mgroup" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">查看团队需求列表(分组)</a>
+					<a href="#creatcircle" data-rel="popup" data-position-to="#quest_event" class="ui-btn ui-corner-all" style="text-align:left; ">新增目标社团</a>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="quest_eventview" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>选择编辑对象</h3>
+					<div id="quest_eventArea"></div>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="quest_control" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<h3>选择操作内容</h3>
+					<div id="quest_controlArea">
+						<a id="system_shime" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">入力截至</a>
+						<a id="system_input" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">系统导入</a>
+						<a href="/quest/output.csv" target="view_window" download="output.csv" class="ui-btn ui-btn-b ui-shadow">队伍CSV下载</a>
+						<a href="/quest/output_task.csv" target="view_window" download="output_task.csv" class="ui-btn ui-btn-b ui-shadow">队伍CSV(顺序)下载</a>
+						<a id="quest_team_delete" class="ui-btn ui-btn-b ui-shadow" style="text-align:left; ">无人需求社团・物品删除</a>
+					</div>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="creatcircle" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<div style="padding:0px 5px;">
+					<form>
+						<h3>添加一个新的目标社团</h3>
+						<label for="circlelocation">社团配置:</label>
+						<input type="text" name="circlelocation" id="circlelocation" value="" data-theme="a">
+						<label for="circlename">社团名:</label>
+						<input type="text" name="circlename" id="circlename" value="" data-theme="a">
+						<label for="circleweb">关联WEB:</label>
+						<input type="text" name="circleweb" id="circleweb" value="http://" pattern="^https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+$" data-theme="a">
+					</form>
+					<button id="creatcirclebutton" data-theme="b" class=" ui-btn ui-btn-b ui-shadow ui-corner-all">创建</button>
+				</div>
+			</div>
+
+			<div role="main" class="ui-content">
+				<ul id="eventArea" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="输入检索字符以查找社团"></ul>
+			</div>
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var isURL = function(CheckNum){
+						if ( CheckNum.match(/^https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+$/) ) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+					
+					$.get("/quest/circle",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					$("#buttonToIndex").click(function() {
+						window.location.assign("/eventselect");
+					});
+					
+					$("#quest_team").click(function() {
+						window.location.assign("/quest/teamview");
+					});
+					
+					
+					$("#quest_team_mgroup").click(function() {
+						window.location.assign("/quest/teamview_mgroup");
+					});
+					
+					$("#system_shime").click(function() {
+						var check = confirm("Are you confirm to stop the team input？");
+						if ( check ) {
+							$.get("/quest/system_shime",
+								function(resData, status) {
+									alert("Data: " + resData + "\nStatus: " + status);
+							});
+						}
+					});
+					
+					$("#system_input").click(function() {
+						var check = confirm("确认开始最终截止?");
+						if ( check ) {
+							$.get("/eventshime_last",
+								function(resData, status) {
+									alert("Data: " + resData + "\nStatus: " + status);
+							});
+						}
+					});
+					
+					$("#quest_team_delete").click(function() {
+						var check = confirm("所有无人需求社团・物品删除将被删除，确认么？");
+						if(check){
+							$.get("/quest/team/delete",
+							function(resdata, status) {
+								alert("Data: " + resdata + "\nStatus: " + status);
+								window.location.assign("/quest/view");
+							});
+						}
+					});
+					var makeUI = function (resData) {
+						for (var i = 0; i < resData.length; i++) {
+							$("#eventArea").append('<a id="cbtn' + i + '" class="ui-btn" style="text-align:left; ">'
+								+ resData[i].CircleLocation
+								+ " " + resData[i].CircleName 
+								+ '</a>');
+							makeeventClick(resData[i], i);
+						}
+					}
+					
+					var makeeventClick = function(resData ,i ) {
+						$("#cbtn" + i).on( "vclick", function() {
+							$.mobile.changePage("/quest/circle/goods", {
+								data: {
+									CircleID : resData.CircleID
+								}
+							});
+						});
+					}
+					
+					
+					$("#quest_event").click(function() {
+						$("#quest_eventArea").text("");
+						
+						$.get("/team/view",
+						function(resData, status) {
+							makeUI(resData);
+						});
+						
+						var makeUI = function (resData) {
+							for (var i = 0; i < resData.length; i++) {
+								$("#quest_eventArea").append('<a href="#' + resData[i].EventID + resData[i].TeamID
+									+ '" data-rel="popup" id="quest_view_button' + i + '" class="ui-btn">'
+									+ "活动:" + resData[i].EventName
+									+ "<br>"
+									+ " 队伍名:" + resData[i].TeamName
+									+ "<br>"
+									+ " 小队名:" + resData[i].GroupName
+									+ '</a>');
+								makeeventClick(resData, i);
+							}
+						}
+						
+						var makeeventClick = function(resData,i) {
+							$("#quest_view_button" + i).on( "vclick", function() {
+								$.post("/team/select", {
+										eventid : resData[i].EventID ,
+										teamid : resData[i].TeamID 
+									},
+									function selectevent(resdata, status) {
+										alert("Data: " + resdata + "\nStatus: " + status);
+										window.location.assign("/quest/view");
+									}
+								);
+							});
+						}
+						
+					});
+					
+					$("#creatcirclebutton").click(function() {
+						var s_CircleLocation = $("#circlelocation").val();
+						var s_CircleName = $("#circlename").val();
+						var s_CircleWeb = $("#circleweb").val();
+						
+						if ( s_CircleLocation != "" &&
+								s_CircleLocation != "" &&
+								isURL(s_CircleWeb) ) {
+									$.post("/quest/circle/create",{
+										CircleLocation: s_CircleLocation.replace(/'/g,"’") ,
+										CircleName: s_CircleName.replace(/'/g,"’") ,
+										CircleWeb: s_CircleWeb
+									},
+									function(resData, status) {
+										//alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign("/quest/view");
+									});
+						} else {
+							alert("Check your input!");
+						}
+					});
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>

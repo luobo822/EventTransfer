@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+		<title>Dashboard &gt; EventSystem</title>
+		<script src="js/jquery.min.1.11.2.js"></script>
+		<script src="js/bootstrap.min.3.3.4.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.3.3.4.css"/>
+		<style>
+			body {
+				padding-top: 50px;
+			}
+			.sub-header {
+				padding-bottom: 10px;
+				border-bottom: 1px solid #eee;
+			}
+			.navbar-fixed-top {
+				border: 0;
+			}
+			.sidebar {
+				display: none;
+			}
+			@media (min-width: 768px) {
+				.sidebar {
+					position: fixed;
+					top: 51px;
+					bottom: 0;
+					left: 0;
+					z-index: 1000;
+					display: block;
+					padding: 20px;
+					overflow-x: hidden;
+					overflow-y: auto;
+					/* Scrollable contents if viewport is shorter than content. */
+					
+					background-color: #f5f5f5;
+					border-right: 1px solid #eee;
+				}
+			}
+			.nav-sidebar {
+				margin-right: -21px;
+				margin-bottom: 20px;
+				margin-left: -20px;
+			}
+			.nav-sidebar > li > a {
+				padding-right: 20px;
+				padding-left: 20px;
+			}
+			.nav-sidebar > .active > a,
+			.nav-sidebar > .active > a:hover,
+			.nav-sidebar > .active > a:focus {
+				color: #fff;
+				background-color: #428bca;
+			}
+			.main {
+				padding: 20px;
+			}
+			@media (min-width: 768px) {
+				.main {
+					padding-right: 40px;
+					padding-left: 40px;
+				}
+			}
+			.main .page-header {
+				margin-top: 0;
+			}
+			.placeholders {
+				margin-bottom: 30px;
+				text-align: center;
+			}
+			.placeholders h4 {
+				margin-bottom: 0;
+			}
+			.placeholder {
+				margin-bottom: 20px;
+			}
+			.placeholder img {
+				display: inline-block;
+				border-radius: 50%;
+			}
+			/*限制列宽*/
+			
+			th {
+				/*width: 10%;*/
+			}
+			.baka{
+				-webkit-transform:rotate(90deg);
+				-moz-transform:rotate(90deg);
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="modal fade" id="setting" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="myModalLabel">Setting</h4>
+					</div>
+					<div class="modal-body">
+						<br>
+						<form class="form-horizontal">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">Refresh Interval (s)</label>
+								<div class="col-sm-8">
+									<input id="refresh_interval" class="form-control" type="number" min="1" max="" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-offset-4 col-sm-8">
+									<div class="checkbox">
+										<label>
+											<input id="auto_refresh" type="checkbox"> Refresh Automatically
+										</label>
+									</div>
+								</div>
+								<br />
+								<br />
+								<br />
+								<hr />
+								<div class="col-sm-offset-2 col-sm-8">
+									<button id="fullscreen" class="btn btn-primary btn-block" data-toggle="button">Full Screen</button>
+								</div>
+							</div>
+
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+					<a class="navbar-brand" href="#">EventSystem</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="/">上帝视角</a><!-- Dashboard！ -->
+						</li>
+						<li><a href="/eventselect">参加活动选择</a><!-- Event Select -->
+						</li>
+						<li><a href="/quest">队伍任务一览</a><!-- Mission Packages -->
+						</li>
+						<li><a href="/infopad" target="view_window">队伍聊天室</a><!-- Team InfoPad！ -->
+						</li>
+						<li><a href="/command">指挥官视角</a><!-- Command！ -->
+						</li>
+						<li><a href="/statusscreen">指挥监控中心</a><!-- StausScreen！ -->
+						</li>
+						<li><a href="/requirement">物品需求文字列生成</a><!-- Generate Requirement JSON！ -->
+						</li>
+						<li><a href="/csv">CSV读取</a><!-- CSV Reader！ -->
+						</li>
+						<li><a href="/shime">締め処理</a><!-- 締め処理 -->
+						</li>
+						<li><a href="/selfsettlement">个人结算单</a><!-- 个人结算单 -->
+						</li>
+						<li><a href="#setting" data-toggle="modal">Setting</a>
+						</li>
+						<li><a href="/logout">Logout</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-3 col-md-2 sidebar">
+					<ul class="nav nav-sidebar">
+						<li class="active"><a href="#">上帝视角</a><!-- Overview！ -->
+						</li>
+						<li><a href="/eventselect">参加活动选择</a><!-- Event Select -->
+						</li>
+						<li><a href="/quest">队伍任务一览</a><!-- Mission Packages！ -->
+						</li>
+						<li><a href="/infopad" target="view_window">队伍聊天室</a><!-- Team InfoPad！ -->
+						</li>
+						<li><a href="/command">指挥官视角</a><!-- Command！ -->
+						</li>
+						<li><a href="/statusscreen">指挥监控中心</a><!-- StausScreen！ -->
+						</li>
+						<li><a href="/requirement">物品需求文字列生成</a><!-- Generate Requirement JSON！ -->
+						</li>
+						<li><a href="/csv">CSV读取</a><!-- CSV Reader！ -->
+						</li>
+						<li><a href="/shime">締め処理</a><!-- 締め処理 -->
+						</li>
+						<li><a href="/selfsettlement">个人结算单</a><!-- 个人结算单 -->
+						</li>
+						<li><a ondblclick="alert('niconico~')">Reports</a>
+						</li>
+					</ul>
+				</div>
+				<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+					<h1 class="page-header">Situation</h1>
+					<div class="row placeholders">
+						<div class="progress">
+							<div id="progress_success_bar" class="progress-bar progress-bar-striped progress-bar-success active" style="width: 0%">
+								<span id="progress_success_span">0% success</span>
+							</div>
+							<div id="progress_moving_bar" class="progress-bar progress-bar-striped progress-bar-warning active" style="width: 0%">
+								<span id="progress_moving_span">0% moving</span>
+							</div>
+							<div id="progress_sell_out_bar" class="progress-bar progress-bar-striped progress-bar-danger active" style="width: 0%">
+								<span id="progress_sell_out_span">0% sell out</span>
+							</div>
+							<div id="progress_fi_bar" class="progress-bar progress-bar-striped progress-bar-info active" style="width: 0%">
+								<span id="progress_fi_span">0% finished</span>
+							</div>
+						</div>
+						<p id="progress_detail" class="text-right"><em></em>
+						</p>
+					</div>
+					<h1 class="sub-header">Form</h1>
+					<br />
+					<input type="text" id="search_text" class="form-control" placeholder="Search in the form..">
+					<br />
+
+					<div class="table-responsive" id="statusPage">
+						<table id="messages" class="table table-hover ">
+							<caption id="time"></caption>
+							<thead>
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<col style="width: 10%" />
+								<tr>
+									<th>#</th>
+									<th>消息类别</th>
+									<th>发送者</th>
+									<th>社团配置</th>
+									<th>社团名</th>
+									<th>物品名</th>
+									<th>买到的数量</th>
+									<th>物品的状况</th>
+									<th>更新价格</th>
+									<th>额外信息</th>
+								</tr>
+							</thead>
+							<tbody id="battlestatus"></tbody>
+						</table>
+
+					</div>
+				</div>
+
+				<script>
+					 //ajax跨域对应 Start
+					$.ajaxSetup({
+						xhrFields: {
+							withCredentials: true
+						}
+					});
+					 //ajax跨域对应 End
+					 //自动刷新部分
+					var is_modal_shown = false;
+					setInterval("check_auto_refresh()", 1000 * Number(localStorage.refresh_interval));
+					if (localStorage.refresh == "true") {
+						document.getElementById("auto_refresh").checked = true;
+					} else {
+						document.getElementById("auto_refresh").checked = false;
+						localStorage.refresh = false;
+					};
+					 if (!localStorage.refresh_interval || Number(localStorage.refresh_interval < 5)) { //检讨：移动端刷新间隔过小导致无法设置刷新间隔！
+						localStorage.refresh_interval = "15";
+					};
+					$("#refresh_interval").val(localStorage.refresh_interval);
+					$("#auto_refresh").on("click", function() {
+						if (localStorage.refresh == "true") {
+							localStorage.refresh = "false";
+						} else {
+							localStorage.refresh = "true";
+						};
+					});
+					$("#refresh_interval").on("change", function() {
+						if (Number(localStorage.refresh_interval) < 1) {
+							localStorage.refresh_interval = "15";
+						} else {
+							$("#refresh_interval").val(Math.round(Number($("#refresh_interval").val())));
+							localStorage.refresh_interval = Math.round(Number($("#refresh_interval").val()));
+						};
+					});
+					$("#setting").on("show.bs.modal", function(e) {
+						is_modal_shown = true;
+					});
+					$("#setting").on("hide.bs.modal", function(e) {
+						is_modal_shown = false;
+					});
+					setInterval("check_auto_refresh()", 15000);
+
+					function check_auto_refresh() {
+							if (localStorage.refresh == "true" && is_modal_shown == false && !$("#search_text").val()) {
+								location.reload();
+							};
+						}
+						//进度条与表单生成部分
+					var calc = new Object();
+					calc = {
+						count: 0,
+						sell_out: 0,
+						success: 0,
+						fi: 0,
+						unfinish: 0
+					};
+					$(document).ready(function() {
+						$("#time").html("表格生成时刻 " + new Date().toLocaleString());
+						$.get("/battle_status",
+							function(resData, status) {
+								//								console.log("Data: " + resData + "\nStatus: " + status);
+								makefrom(traslation(resData));
+							});
+					});
+					var traslation = function(trnData) {
+						for (var n = 0; n < trnData.length; n++) {
+							calc.count++;
+							if (trnData[n].Status == "WA") {
+								trnData[n].Status = '<td class="warning">在队列中</td>';
+							} else if (trnData[n].Status == "FI") {
+								trnData[n].Status = '<td class="success">完成任务</td>';
+							} else if (trnData[n].Status == "RS") {
+								trnData[n].Status = '<td class="danger">重置社团</td>';
+							} else if (trnData[n].Status == "GV") {
+								trnData[n].Status = '<td class="danger">放弃社团</td>';
+							} else if (trnData[n].Status == "FR") {
+								trnData[n].Status = '<td class="info">请求任务</td>';
+							} else {
+								trnData[n].Status = "<td>" + trnData[n].Status + "</td>";
+							}
+							if (trnData[n].GoodsStatus == "OK") {
+								trnData[n].GoodsStatus = '<td class="success">正常</td>';
+								calc.success++;
+							} else if (trnData[n].GoodsStatus == "FI") {
+								trnData[n].GoodsStatus = '<td class="info">完成</td>';
+								calc.fi++;
+							} else if (trnData[n].GoodsStatus == "SO") {
+								trnData[n].GoodsStatus = '<td class="danger">完卖</td>';
+								calc.sell_out++;
+							} else {
+								trnData[n].GoodsStatus = "<td>" + trnData[n].GoodsStatus + "</td>";
+							}
+							if (trnData[n].UpdatePrice == null) {
+								trnData[n].UpdatePrice = "原价";
+							}
+							if (trnData[n].Info == null) {
+								trnData[n].Info = "无";
+							}
+						}
+						setProgressBar(calc);
+						return trnData;
+					}
+					var makefrom = function(resData) {
+						for (var i = 0; i < resData.length; i++) {
+							$("#battlestatus").append('<tr id ="status' + i + '"></tr>');
+							$("#status" + i).append('<td>' + resData[i].MessageNo + '</td>');
+							$("#status" + i).append(resData[i].Status);
+							$("#status" + i).append('<td>' + resData[i].UserName + '</td>');
+							$("#status" + i).append('<td>' + resData[i].CircleLocation + '</td>');
+							$("#status" + i).append('<td>' + resData[i].CircleName + '</td>');
+							$("#status" + i).append('<td>' + resData[i].GoodsName + '</td>');
+							$("#status" + i).append('<td align="center"><strong>' + resData[i].Num + '</strong></td>');
+							$("#status" + i).append(resData[i].GoodsStatus);
+							$("#status" + i).append('<td>' + resData[i].UpdatePrice + '</td>');
+							$("#status" + i).append('<td>' + resData[i].Info + '</td>');
+						}
+					}
+					var setProgressBar = function(data) {
+							var success = 100 * data.success / data.count;
+							var sell_out = 100 * data.sell_out / data.count;
+							var fi = 100 * data.fi / data.count;
+							$("#progress_success_bar").css("width", success.toFixed(3) + "%");
+							$("#progress_success_span").text(success.toFixed(1) + "% success");
+							$("#progress_sell_out_bar").css("width", sell_out.toFixed(3) + "%");
+							$("#progress_sell_out_span").text(sell_out.toFixed(1) + "% sell out");
+							$("#progress_fi_bar").css("width", fi.toFixed(3) + "%");
+							$("#progress_fi_span").text(fi.toFixed(1) + "% finished");
+							$("#progress_detail").text("*共计消息件数 " + data.count + " 件; 正常 " + data.success + " 件; 完成 " + data.fi + " 件; 完卖 " + data.sell_out + " 件")
+						}
+						//表单筛选部分
+					$("#search_text").keyup(function(event) {
+						if (event.which == 13 || !$("#search_text").val()) {
+							filter_form();
+						};
+					});
+					$("#search_text").blur(function() {
+						filter_form();
+					});
+
+					function filter_form() {
+						if ($("#search_text").val().indexOf("&&") != -1) {
+							$("tr").not(":first").hide(); //先隐藏所有非表头行
+							var filterTextArray = $("#search_text").val().split("&&");
+							var selector_str = "";
+							for (var x in filterTextArray) {
+								selector_str += ":contains(" + filterTextArray[x] + ")";
+							}
+							$("tr" + selector_str).fadeIn("fast");
+						} else {
+							var filterTextArray = $("#search_text").val().split("||");
+							if (filterTextArray) {
+								$("tr").not(":first").hide(); //先隐藏所有非表头行
+								for (var x in filterTextArray) {
+									$("tr:contains(" + filterTextArray[x] + ")").fadeIn("fast");
+								};
+							} else { //若文本框为空
+								$("tr").not(":first").fadeIn("fast"); //显示所有的非表头行
+							};
+						};
+					};
+					 //全屏化部分
+					function fullScreen(element) {
+						if (element.requestFullScreen) {
+							element.requestFullScreen();
+						} else if (element.webkitRequestFullScreen) {
+							element.webkitRequestFullScreen();
+						} else if (element.mozRequestFullScreen) {
+							element.mozRequestFullScreen();
+						}
+					}
+
+					function fullScreenCancel() {
+						if (document.cancelFullScreen) {
+							document.cancelFullScreen();
+						} else if (document.webkitCancelFullScreen) {
+							document.webkitCancelFullScreen();
+						} else if (document.mozCancelFullScreen) {
+							document.mozCancelFullScreen();
+						}
+					}
+					$("#fullscreen").on("click", function() {
+						if (document.webkitIsFullScreen || document.mozFullScreen || document.fullScreen) {
+							fullScreenCancel();
+						} else {
+							fullScreen(document.documentElement);
+						}
+					});
+				</script>
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+	<style>
+		.ui-panel{
+			width: 15em;
+			right: 0;
+		}
+	</style>
+
+	<body>
+		<div data-role="page" id="chatroom">
+			<div data-role="header" style="position:fixed; top:0; width: 100%; border: 0;">
+				<h1>队伍信息板</h1>
+				<a id="buttonToClose" data-role="button" data-icon="back">关闭</a>
+				<div data-role="button" class="ui-btn-right">
+					<a href="#chatroom_panel" id="chatroom_panel_btn" data-role="button" data-theme="b" data-icon="gear">成员一览</a>
+				</div>
+			</div>
+			
+			<div data-role="panel" id="chatroom_panel" data-theme="b" data-position="right">
+				<h3>在线人员一览</h3>
+				<div id="oneline_list">
+				</div>
+				<br>
+				<a data-rel="close" data-theme="a" data-role="button" data-icon="bars">隐藏</a>
+			</div>
+			
+			<div id="messages" role="main" class="ui-content" style="padding-top: 60px; padding-bottom:60px; border: 0; text-align: left;">
+			</div>
+			
+			<div data-role="footer" data-inline="true" style="background: #000; position: fixed; bottom: 0; width: 100%; border: 0;">
+				<div class="ui-grid-a">
+					<div style="width: 60%; margin-left: 5px">
+						<input id="m" autocomplete="off" style="border: 0;">
+					</div>
+					<button id="msg_push" style="width: 30%; background: rgb(130, 224, 255); border: none; margin-top: 7px; margin-right: 5px" class="ui-btn-right ui-btn ui-shadow ui-corner-all">
+						発信
+					</button>
+				</div>
+			</div>
+				
+			<script>
+				var isUserful = true;
+				$("#buttonToClose").click(function() {
+					window.close();
+				});
+				$(document).on("pagecontainerchange", function() {
+					var socket = io();
+					$('#msg_push').click(function(){
+						var msg = $('#m').val().replace(/'/g,"’");
+						if ( msg != "") {
+							socket.emit('chat message', msg);
+							$('#m').val('');
+						}
+					});
+					socket.on('chat message', function(messages){
+						try{
+							if(window.Notification && isUserful){
+								if(messages.type == "new" &&
+									Notification.permission == "granted") {
+									var notification = new Notification(messages.msg);
+								}
+							}
+						}catch(err){
+							isUserful = false;
+						}
+						$('#messages').append('<div style="text-align:left; white-space:normal; padding: 1px; word-wrap:break-word; word-break:normal; ">' + messages.msg + '</div>');
+					});
+					socket.on('online list', function(msg){
+						$('#oneline_list').text('');
+						for( one in msg) {
+							$('#oneline_list').append('<div id="'+ one +'">' + '[在线] ' + msg[one] + '</div>');
+						}
+					});
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+			</script>
+		</div>
+	</body>
+
+</html>
