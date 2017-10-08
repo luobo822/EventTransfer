@@ -15,6 +15,6 @@ CREATE TABLE `BifQuestMemberIF` (
   `RequestNum` int(11) NOT NULL,
   `Version` int(11) NOT NULL DEFAULT '0',
   `UpdateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `CreateTime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `CreateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`IFType`,`EventID`,`TeamID`,`GroupID`,`CircleLocation`,`CircleName`,`GoodsName`,`GoodsPrice`,`RequesterID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
