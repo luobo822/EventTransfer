@@ -264,7 +264,11 @@
 					for (var i = 0; i < resData.length; i++) {
 						goodsCollection[i] = resData[i];
 						goodsCollection[i].Status = $("#select-choice-status").val();
-						goodsCollection[i].GoodsPrice = $("#goodsTextPlus" + i).val();
+						goodsCollection[i].GoodsPrice = 0;
+						var pattern = /^-?[1-9]\d*$/;
+						if(pattern.test($("#goodsTextPlus" + i).val())){
+							goodsCollection[i].GoodsPrice = $("#goodsTextPlus" + i).val();
+						}
 						if (goodsCollection[i].Num == $("#goodsText" + i).val()) {
 							if (resData[i].GoodsStatus != "SO"){
 								goodsCollection[i].GoodsStatus = "FI";
@@ -282,7 +286,7 @@
 					for (var i = 0; i < resData.length; i++) {
 						goodsCollection[i] = resData[i];
 						goodsCollection[i].Status = "FI";
-						goodsCollection[i].GoodsPrice = null;
+						goodsCollection[i].GoodsPrice = 0;
 						goodsCollection[i].Num = $("#goodsText" + i).val();
 						goodsCollection[i].Info = "全部完成啦!";
 						if (resData[i].GoodsStatus != "SO"){
@@ -296,7 +300,7 @@
 					for (var i = 0; i < resData.length; i++) {
 						goodsCollection[i] = resData[i];
 						goodsCollection[i].Status = "FI";
-						goodsCollection[i].GoodsPrice = null;
+						goodsCollection[i].GoodsPrice = 0;
 						goodsCollection[i].Num = 0;
 						goodsCollection[i].Info = "全部完卖了!";
 						goodsCollection[i].GoodsStatus = "SO";
@@ -309,7 +313,7 @@
 					waitInfo[0].Status = "WA";
 					waitInfo[0].GoodsID = null;
 					waitInfo[0].GoodsName = null;
-					waitInfo[0].GoodsPrice = null;
+					waitInfo[0].GoodsPrice = 0;
 					waitInfo[0].Num = 0;
 					waitInfo[0].Info = "在队列中!";
 					waitInfo[0].GoodsStatus = "OK";
@@ -321,7 +325,7 @@
 						freeInfo[0].Status = "FR";
 						freeInfo[0].GoodsID = null;
 						freeInfo[0].GoodsName = null;
-						freeInfo[0].GoodsPrice = null;
+						freeInfo[0].GoodsPrice = 0;
 						freeInfo[0].Num = 0;
 						freeInfo[0].Info = "我现在闲的不行!";
 						freeInfo[0].GoodsStatus = "OK";
