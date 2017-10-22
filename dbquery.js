@@ -3,12 +3,11 @@
 	var inspect = require('util').inspect;
 	//DataBase
 
-	var DB_HOSTNAME = '127.0.0.1';
-	var DB_PORT = '3306';
-	var DB_DATABASE = 'nodejs';
-	var DB_USER = 'admin7eeyDzy';
-	var DB_PASSWORD = 'N73DmRjzta1b';
-
+	var DB_HOSTNAME = process.env.EVENTTRANSFER_MYSQL_HOSTNAME;
+	var DB_PORT = process.env.EVENTTRANSFER_MYSQL_PORT;
+	var DB_DATABASE = process.env.EVENTTRANSFER_MYSQL_DATABASE;
+	var DB_USER = process.env.EVENTTRANSFER_MYSQL_USER;
+	var DB_PASSWORD = process.env.EVENTTRANSFER_MYSQL_PASSWORD;
 
 	// MySQL データベース名、ユーザー名、パスワード
 	var pool = mysql.createPool({
