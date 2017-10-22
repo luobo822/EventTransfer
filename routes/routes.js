@@ -220,15 +220,6 @@ module.exports = function(self) {
 		res.setHeader('Content-Type', 'text/html');
 		res.send(self.cache_get('quest.html'));
 	};
-
-	//////////廃棄予定///////
-	//// @type 网页路由
-	//// @target 目标列表
-	//routesGET['/task'] = function(req, res) {
-	//	res.setHeader('Content-Type', 'text/html');
-	//	res.send(self.cache_get('task.html'));
-	//};
-	//////////廃棄予定///////
 	
 	// @type 网页路由
 	// @target 任务包
@@ -308,6 +299,13 @@ module.exports = function(self) {
 	routesGET['/quest/view'] = function(req, res) {
 		res.setHeader('Content-Type', 'text/html');
 		res.send(self.cache_get('quest_view.html'));
+	};
+	
+	// @type 网页路由
+	// @target XXX
+	routesGET['/team/mission'] = function(req, res) {
+		res.setHeader('Content-Type', 'text/html');
+		res.send(self.cache_get('team_mission.html'));
 	};
 	
 	// @type 网页路由
@@ -2008,6 +2006,10 @@ module.exports = function(self) {
 	routesGET['/quest/team/delete'] = require('./quest_team_delete_null.js')(world);
 	routesPOST['/quest/self/upload'] = require('./quest_self_upload.js')(world);
 		routesGET['/quest/self/delete'] = require('./quest_self_delete.js')(world);
+	routesGET['/team/mission/view'] = require('./team_mission_view.js')(world);
+		routesPOST['/team/mission/create'] = require('./team_mission_create.js')(world);
+		routesPOST['/team/mission/delete'] = require('./team_mission_delete.js')(world);
+		routesPOST['/team/mission/update'] = require('./team_mission_update.js')(world);
 		
 	routesPOST['/package/lock'] = require('./package_lock.js')(world);
 	routesPOST['/package/unlock'] = require('./package_unlock.js')(world);

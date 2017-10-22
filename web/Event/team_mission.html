@@ -1,0 +1,172 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="team_mission">
+			<div data-role="header">
+				<h1>任务组管理界面</h1>
+				<a href="#team_mission_panel_left" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+			</div>
+			
+			<div data-role="panel" id="team_mission_panel_left" data-theme="b">
+				<div id="team_mission_panel_left_area" data-inline="true">
+					<a id="team_mission_back_button" data-icon="home" class="ui-btn">返回</a>
+					<a href="#team_mission_create_pop" id="team_mission_create" data-rel="popup" class="ui-btn">创建任务组</a>
+				</div>
+			</div>
+			
+			<div data-role="popup" id="team_mission_create_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<h3>创建任务组</h3>
+				<label for="create_name"><h4>队伍名</h4></label>
+				<input type="text" name="create_name" id="team_mission_create_name" value="" data-theme="a">
+				<label for="team_mission_create_select" class="select"><h4>选择任务组类型</h4></label>
+				<select name="team_mission_create_select" id="team_mission_create_select" data-mini="true">
+				  <option value="second">second</option>
+				  <option value="group">group</option>
+				  <option value="other">other</option>
+				  <option value="temp">temp</option>
+				</select>
+				<a href="#" id="team_mission_create_send" class="ui-btn">创建</a>
+			</div>
+			
+			<div data-role="panel" id="team_mission_panel_right" data-theme="b" data-position="right">
+				<div style="padding:5px 5px;">
+					<h3>任务组管理</h3>
+					<div id="team_mission_panel_right_area" data-inline="true">
+						<h4>选择操作</h4>
+						<div id="team_mission_do">
+							<a id="team_mission_delete" class="ui-btn">删除任务组</a>
+							<a id="team_mission_detail" class="ui-btn">编辑任务组详细</a>
+							<h4>任务组信息设置</h4>
+							<h5>任务组名称</h5>
+							<input type="text" name="team_mission_rname" id="team_mission_rname" value="" data-theme="a">
+							<label for="select_team_mission" class="select"><h5>任务组类型</h5></label>
+							<select name="select_team_mission" id="select_team_mission" data-mini="true">
+							  <option value="second">second</option>
+							  <option value="group">group</option>
+							  <option value="other">other</option>
+							  <option value="temp">temp</option>
+							</select>
+							<a href="#" id="team_mission_change" class="ui-btn">更新任务组信息</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<ul id="team_mission_area" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="输入任务组名称"></ul>
+			</div>
+			
+			<div data-role="popup" id="team_mission_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<h3>修改任务组名称</h3>
+			</div>
+			
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					$.get("/team/mission/view",
+						function(resData, status) {
+							makeUI(resData);
+					});
+					
+					
+					$("#team_mission_back_button").click(function() {
+						window.location.assign("/quest/view");
+					});
+					
+					$("#team_mission_create_send").click(function() {
+						$.post("/team/mission/create",{
+								missiongroupname : $("#team_mission_create_name").val(),
+								missiongrouptype : $("#team_mission_create_select").val()
+							},
+							function(resData, status) {
+								alert("Data: " + resData + "\nStatus: " + status);
+								window.location.assign("/team/mission");
+						});
+					});
+					
+					var makeUI = function (resData) {
+						for (one in resData) {
+							$("#team_mission_area").append('<a href="#team_mission_panel_right" id="team_mission_panel_right_' + resData[one].MissionGroupID +  '" class="ui-btn" style="text-align:left; ">'
+								+ "[" + resData[one].MissionGroupType + "]" + resData[one].MissionGroupName + "  创建者:" + resData[one].Editor
+							+ '</a>');
+							//makeClick(resData[one], resData[one].UserID);
+							makePopClick(resData, one);
+						}
+					}
+					
+					/*
+					var makeClick = function (resData, UserID) {
+						$("#member" + UserID).click(function() {
+							$("#membertask_group").text('');
+							$.post("/quest/task",{
+									targetid : UserID
+								},
+								function(resData, status) {
+									for ( one in resData ){
+										$("#membertask_group").append('<a href="#membertask_pop" id="task_pop'+ one +'" data-rel="popup" class="ui-btn">'
+										+ "[" + resData[one].Level + "]"
+										+ resData[one].CircleLocation + " " + resData[one].CircleName + '</a>');
+										makePopClick(resData, one);
+									}
+							});
+						});
+					}*/
+					
+					var makePopClick = function (resData, one) {
+						$("#team_mission_panel_right_"+ resData[one].MissionGroupID).click(function() {
+							$("#team_mission_delete").unbind("click");
+							$("#team_mission_change").unbind("click");
+							$("#team_mission_rname").val(resData[one].MissionGroupName);
+							$("#select_team_mission").val(resData[one].MissionGroupType).selectmenu('refresh');
+							$("#team_mission_delete").click(function() {
+								var check = confirm("Only owner and leader can delete it.Are you sure？");
+								if(check){
+									$.post("/team/mission/delete",{
+											missiongroupid : resData[one].MissionGroupID
+										},
+										function(resData, status) {
+										//do sometings
+										alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign("/team/mission");
+									});
+								}
+							});
+							$("#team_mission_change").click(function() {
+								$.post("/team/mission/update",{
+										missiongroupid : resData[one].MissionGroupID ,
+										missiongroupname : $("#team_mission_rname").val(),
+										missiongrouptype : $("#select_team_mission").val()
+									},
+									function(resData, status) {
+										//do sometings
+										window.location.assign("/team/mission");
+								});
+							});
+						});
+					}
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>
