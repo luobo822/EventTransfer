@@ -68,6 +68,7 @@
 								if(messages.type == "new" &&
 									Notification.permission == "granted") {
 									var notification = new Notification(messages.msg);
+									alert(messages.msg);
 								}
 							}
 						}catch(err){

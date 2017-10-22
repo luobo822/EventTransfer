@@ -63,7 +63,7 @@ module.exports = function(self) {
 			});
 		});
 	};
-	
+	world.insertMsg = insertMsg;
 	
 	//认证模块
 	self.passport.use(
