@@ -25,4 +25,5 @@
 	zcache['public_menuinfo.html'] = fs.readFileSync(path + 'Public/public_menuinfo.html');
 	zcache['quest_self.html'] = fs.readFileSync(path + 'Event/quest_self.html');
 	zcache['quest_teamview_mgroup.html'] = fs.readFileSync(path + 'Event/quest_teamview_mgroup.html');
+	zcache['team_mission.html'] = fs.readFileSync(path + 'Event/team_mission.html');
 }
