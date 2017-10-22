@@ -5,6 +5,7 @@
 		res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 		var r_eventid = req.session.userconfig.eventselected.eventid ;
 		var r_teamid = req.session.userconfig.eventselected.teamid ;
+		var r_userid = req.user.userid ;
 		var r_missiongroupname = req.body.missiongroupname;
 		var r_missiongrouptype = req.body.missiongrouptype;
 		
@@ -18,6 +19,7 @@
 						" `MissionGroupID`, " + 
 						" `MissionGroupName`, " + 
 						" `MissionGroupType`, " + 
+						" `UserID`, " + 
 						" `Version`, " + 
 						" `UpdateTime`, " + 
 						" `CreateTime`) " + 
@@ -32,6 +34,7 @@
 						" AND `BifMissionGroup`.`TeamID` = '" + r_teamid + "') AS TMP)," + 
 						" '" + r_missiongroupname + "', " + 
 						" '" + r_missiongrouptype + "', " + 
+						" '" + r_userid + "', " + 
 						" 0, " + 
 						" now(), " + 
 						" now() ); " ;
