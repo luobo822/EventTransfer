@@ -47,9 +47,9 @@
 					</button>
 				</div>
 			</div>
-				
 			<script>
 				var isUserful = true;
+				thisAlertFlag=localStorage.alertFlag;
 				$("#buttonToClose").click(function() {
 					window.close();
 				});
@@ -65,11 +65,16 @@
 					socket.on('chat message', function(messages){
 						try{
 							if(window.Notification && isUserful){
-								if(messages.type == "new" &&
-									Notification.permission == "granted") {
-									var notification = new Notification(messages.msg);
+								if(messages.type == "new") {
+									if(Notification.permission == "granted") {
+										var notification = new Notification(messages.msg);
+									}
+									if(localStorage && localStorage.alertFlag != "N"){
+										alert(messages.msg);
+									}
 								}
 							}
+							
 						}catch(err){
 							isUserful = false;
 						}

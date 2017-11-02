@@ -26,6 +26,7 @@
 					<a href="/quest" class="ui-btn ui-corner-all" style="text-align:left; ">返回</a>
 					<a id="package_lock" class="ui-btn ui-corner-all" style="text-align:left; ">标记该任务</a>
 					<a id="package_unlock" class="ui-btn ui-corner-all" style="text-align:left; ">解除该任务</a>
+					<a id="package_command" class="ui-btn ui-corner-all" style="text-align:left; ">指挥官操作界面</a>
 				</div>
 			</div>
 			<a href="#package_chat_pop" id="package_chat" data-rel="popup" data-role="button" style="position: fixed; bottom: 20px; right: 10px; background: rgb(130, 224, 255); z-index:999;">
@@ -180,6 +181,9 @@
 						locker = resData[0].UserNickName;
 					}
 					$("#packCircle").html('我是:' + resData[0].UserName + '</br>标记该任务的用户:' + locker + '</br>' + '<h3>【' + resData[0].CircleLocation + '】' + resData[0].CircleName + '</h3></br>');
+					$("#package_command").click(function() {
+						window.location.assign("/action?CircleID=" + getParam("CircleID") + "&CircleLocation=" + resData[0].CircleLocation + "&CircleName=" + resData[0].CircleName);
+					});
 					
 					for (var i = 0; i < resData.length; i++) {
 						resData[i].bNum = parseInt(resData[i].bNum);
@@ -357,7 +361,6 @@
 									package: reqData
 								},
 								function alert_and_back(data, status) {
-									//$.mobile.changePage("/quest");
 									window.location.assign("/quest");
 									alert("Data: " + data + "\nStatus: " + status);
 								});

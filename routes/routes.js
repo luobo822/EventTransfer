@@ -351,6 +351,29 @@ module.exports = function(self) {
 	// 查询任务池信息
 	// @return  resault 查询结果
 	routesGET['/quest_info'] = function(req, res) {
+		res.setHeader('Content-Type', 'application/json');
+		var r_url_parts = require('url').parse(req.url,true);
+		//console.log(r_url_parts.query.viewtype);
+		var plussql = "";
+		if(r_url_parts.query && r_url_parts.query.viewtype){
+			if(r_url_parts.query.viewtype=="ALL"){
+			}else if(r_url_parts.query.viewtype=="ONA"){
+				plussql = " AND `FifQuestCircle`.`CircleStatus` IN ('ST','ON')";
+			}else if(r_url_parts.query.viewtype=="ONF"){
+				plussql = " AND `FifQuestCircle`.`CircleStatus` IN ('FI','GV')";
+			}else if(r_url_parts.query.viewtype=="FMS"){
+				plussql = " AND EXISTS ( " +
+					"SELECT * FROM `FifQuestTask`" +
+					"WHERE `FifQuestTask`.`EventID` = `FifQuestCircle`.`EventID`" +
+					"AND `FifQuestTask`.`TeamID` = `FifQuestCircle`.`TeamID`" +
+					"AND `FifQuestTask`.`CircleID` = `FifQuestCircle`.`CircleID`" +
+				")";
+			}else if(r_url_parts.query.viewtype=="OMS"){
+				// TODO
+			}else if(r_url_parts.query.viewtype=="LCK"){
+				plussql = " AND `FifQuestCircle`.`LockerID` IS NOT NULL";
+			}
+		}
 		var queryStr = "SELECT `FifQuestCircle`.`EventID`," +
 			"`FifQuestCircle`.`CircleID`," +
 			"`FifQuestCircle`.`CircleLocation`," +
@@ -364,10 +387,9 @@ module.exports = function(self) {
 			" FROM `FifQuestCircle`" +
 			" WHERE `FifQuestCircle`.`EventID` = '" + req.session.userconfig.eventselected.eventid + "'" +
 			" AND `FifQuestCircle`.`TeamID` = '" + req.session.userconfig.eventselected.teamid + "'" +
+			plussql +
 			" ORDER BY `FifQuestCircle`.`CircleLocation`;"
 			//console.log(queryStr);
-
-		res.setHeader('Content-Type', 'application/json');
 		var queryCallBack = function(resault) {
 			//console.log("SQL result:" + resault);
 			res.send(resault);

@@ -16,7 +16,7 @@
 				<!-- 目標先は非jQueryMobile！ -->
 				<a id="buttonToIndex" data-role="button" data-icon="home">首页</a>
 				<div data-role="button" class="ui-btn-right">
-					<a href="#quest_task_panel" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                攻击顺序</a>
+					<a href="#quest_task_panel" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                详细菜单</a>
 				</div>
 			</div>
 			
@@ -31,8 +31,25 @@
 				<ul id="quest" data-role="listview" data-filter="true" data-inset="true" data-filter-placeholder="在下面的任务中搜索!"></ul>
 			</div>
 			<div data-role="panel" id="quest_task_panel" data-theme="b" data-position="right">
-				<h3>攻击顺序</h3>
+				<h4>攻击顺序</h4>
 				<div id="minetask" data-inline="true">
+				</div>
+				<h4>消息弹出设置</h4>
+				<div data-role="fieldcontain" id="alertFlagSetF">
+					<select name="alertFlagSet" id="alertFlagSet" data-role="slider" data-native-menu="false">
+						<option value="on">弹出</option>
+						<option value="off">禁止</option>
+					</select>
+				</div>
+				<label for="quest_view_viewtypeset" class="select"><h4>选择视图类型</h4></label>
+				<select name="quest_view_viewtypeset" id="quest_view_viewtypeset" data-mini="true">
+				  <option value="ALL">全部</option>
+				  <option value="ONA">未完成</option>
+				  <option value="ONF">已完成</option>
+				  <option value="FMS">主要任务组</option>
+				  <option value="OMS">其他任务组(未实装)</option>
+				  <option value="LCK">被锁定的目标</option>
+				</select>
 			</div>
 			<div id="quest_sister_pop" data-role="popup" data-theme="a" style="padding:10px 10px;" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
 				<img src="/image/sister" />
@@ -73,7 +90,11 @@
 					$.mobile.changePage("/task");
 				});
 				$(document).on("pagecontainerchange", function() {
-					$.get("/quest_info",
+					var tempstr = ""
+					if(localStorage && localStorage.viewtype){
+						tempstr+="?viewtype="+localStorage.viewtype;
+					}
+					$.get("/quest_info" + tempstr,
 						function make_UI(resData, status) {
 							makeUI(resData);
 						});
@@ -159,15 +180,58 @@
 				
 				var task_pop_to = function(one, resData) {
 					$("#task_pop" + one).click(function() {
-						//$.mobile.changePage("/package", {
-						//	data: {
-						//		CircleID : resData[one].CircleID
-						//	}
-						//});
 						window.location.assign("/package?CircleID=" + resData[one].CircleID); 
 					});
 				}
 				
+				if(!localStorage.alertFlag){
+					localStorage.alertFlag="N";
+				}
+				if(localStorage.alertFlag=="Y" ){
+					$("#alertFlagSet").val("on");
+				} else {
+					$("#alertFlagSet").val("off");
+				}
+				$("#alertFlagSet").change(function(){
+					if(localStorage && $("#alertFlagSet").val() == "on"){
+						localStorage.alertFlag="Y";
+					}else if(localStorage &&  $("#alertFlagSet").val() == "off" ){
+						localStorage.alertFlag="N";
+					}
+				});
+				
+				if(!localStorage.viewtype){
+					localStorage.viewtype="ALL";
+				}
+				if(localStorage.viewtype=="ALL"){
+					$("#quest_view_viewtypeset").val("ALL");
+				}else if(localStorage.viewtype=="ONA"){
+					$("#quest_view_viewtypeset").val("ONA");
+				}else if(localStorage.viewtype=="ONF"){
+					$("#quest_view_viewtypeset").val("ONF");
+				}else if(localStorage.viewtype=="FMS"){
+					$("#quest_view_viewtypeset").val("FMS");
+				}else if(localStorage.viewtype=="OMS"){
+					$("#quest_view_viewtypeset").val("OMS");
+				}else if(localStorage.viewtype=="LCK"){
+					$("#quest_view_viewtypeset").val("LCK");
+				}
+				$("#quest_view_viewtypeset").change(function(){
+					if($("#quest_view_viewtypeset").val()=="ALL"){
+						localStorage.viewtype="ALL";
+					}else if($("#quest_view_viewtypeset").val()=="ONA"){
+						localStorage.viewtype="ONA";
+					}else if($("#quest_view_viewtypeset").val()=="ONF"){
+						localStorage.viewtype="ONF";
+					}else if($("#quest_view_viewtypeset").val()=="FMS"){
+						localStorage.viewtype="FMS";
+					}else if($("#quest_view_viewtypeset").val()=="OMS"){
+						localStorage.viewtype="OMS";
+					}else if($("#quest_view_viewtypeset").val()=="LCK"){
+						localStorage.viewtype="LCK";
+					}
+					window.location.assign("/quest");
+				});
 			</script>
 		</div>
 	</body>
