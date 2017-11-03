@@ -56,10 +56,11 @@
 						var categoryKey = paramsArray[key];
 						return categoryKey;
 					}
+					var s_missiongroupid = getParam("MissionGroupID");
 					
 					$.post("/team/mission/detail/view",
 						{
-							missiongroupid : getParam("MissionGroupID")
+							missiongroupid : s_missiongroupid
 						},
 						function(resData, status) {
 							//makeUI(resData);
@@ -67,7 +68,7 @@
 					
 					$.post("/team/mission/detail/view/panel",
 						{
-							missiongroupid : getParam("MissionGroupID")
+							missiongroupid : s_missiongroupid
 						},
 						function(resData, status) {
 							makeUIpanel(resData);
@@ -79,28 +80,40 @@
 					});
 					
 					
-					$("#team_mission_detail_create").click(function() {
-						/*$.post("/team/mission/create",{
-								missiongroupname : $("#team_mission_create_name").val(),
-								missiongrouptype : $("#team_mission_create_select").val()
-							},
-							function(resData, status) {
-								alert("Data: " + resData + "\nStatus: " + status);
-								window.location.assign("/team/mission");
-						});*/
-						
-						var vals = $("[name='checkbox-circle']:checked");
-						var 
-						
-					});
-					
 					var makeUIpanel = function (resData) {
 						for (one in resData) {
-							$("#team_mission_detail_controlgroup").append('<input type="checkbox" name="checkbox-circle" id="checkbox-circle-' + resData[one].CircleID + '" value="' + resData[one].CircleID + '">'
+							$("#team_mission_detail_controlgroup").append('<input type="checkbox" name="checkbox-circle" id="checkbox-circle-' + resData[one].CircleID + '" value="' + resData[one].MissionGroupID + ',' +  resData[one].CircleID + '">'
 							+ '<label for="checkbox-circle-' + resData[one].CircleID + '">' + resData[one].CircleLocation + ' ' + resData[one].CircleName + '</label>');
 						}
 						$("#team_mission_detail_controlgroup").trigger('create');
 					}
+					
+					
+					
+					$("#team_mission_detail_create").click(function() {
+						var vals=$("[name='checkbox-circle']:checked");
+						var circleidlist={};
+						circleidlist.length=vals.length;
+						if(circleidlist.length>0){
+							for(var i=0;i<circleidlist.lengt;i++){
+								var prams = vals[i].value().split(',');
+								circleidlist[i].missiongroupid=prams[0];
+								circleidlist[i].circleid=prams[1];
+							}
+						}
+						detailcreatepost(circleidlist);
+					});
+					
+					var detailcreatepost = function (s_circleidlist) {
+						$.post("/team/mission/detail/create",
+							{
+								circleidlist : s_circleidlist
+							},
+							function(resData, status) {
+								window.location.assign("/team/mission/detail");
+						});
+					}
+					
 					
 					/*
 					var makeClick = function (resData, UserID) {
