@@ -26,7 +26,7 @@
 						"AND `BifMissionGroupDetail`.`TeamID` = `BifQuestCircle`.`TeamID` " +
 						"AND `BifMissionGroupDetail`.`TeamID` = `BifQuestCircle`.`TeamID` " +
 						"AND `BifMissionGroupDetail`.`CircleID` = `BifQuestCircle`.`CircleID` " +
-						"ORDER BY `BifQuestCircle`.`CircleLocation`,`BifQuestCircle`.`CircleName`;" ;
+						"ORDER BY `BifMissionGroupDetail`.`Level`,`BifQuestCircle`.`CircleLocation`,`BifQuestCircle`.`CircleName`;" ;
 		//console.log(queryStr);
 		
 		query.get(queryStr, function(result) {

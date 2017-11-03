@@ -45,7 +45,7 @@
 			}
 			valueStr = valueStr.replace(/.$/, ";");
 			
-			console.log(valueStr);
+			//console.log(valueStr);
 			query.put(valueStr, function(result) {
 				res.send("OK!");
 			});

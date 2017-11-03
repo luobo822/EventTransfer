@@ -23,6 +23,10 @@
 				</div>
 			</div>
 			
+			<div data-role="panel" id="team_mission_detail_panel_level" data-theme="b" data-display="overlay">
+				<a id="team_mission_detail_level_button" class="ui-btn">更新任务权重</a>
+			</div>
+			
 			<div data-role="panel" id="team_mission_detail_panel_right" data-theme="b" data-position="right" data-display="overlay">
 				<a id="team_mission_detail_create" class="ui-btn">添加目标社团</a>
 				<div data-role="controlgroup" data-filter="true">
@@ -42,8 +46,9 @@
 			
 			<script>
 				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var oUrl = location.href;
 					var getParam = function(key) {
-						var url = decodeURIComponent(location.href);
+						var url = decodeURIComponent(oUrl);
 						parameters = url.split("?");
 						params = parameters[1].split("&");
 						var paramsArray = [];
@@ -81,9 +86,9 @@
 					var makeUI = function (resData) {
 						for (one in resData) {
 							$("#team_mission_detail_area").append('<li>'
-								+ '<a href="#">'
-									+ '<h3>TEST</h3>'
-									+ '<p>test</p>'
+								+ '<a href="#team_mission_detail_panel_level">'
+									+ '<h3>[' + resData[one].CircleLocation + ']' + resData[one].CircleName + '</h3>'
+									+ '<p>权重:' + resData[one].Level + '</p>'
 								+ '</a>'
 								+ '<a href="#" class="delete">Delete</a>'
 							+ '</li>');
@@ -126,7 +131,7 @@
 								circleidlist : s_circleidlist
 							},
 							function(resData, status) {
-								window.location.assign("/team/mission/detail");
+								window.location.assign(oUrl);
 						});
 					}
 					
