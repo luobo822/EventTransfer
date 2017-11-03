@@ -56,7 +56,7 @@
 	* [返回值] true:  数値
 	*          false: 数値以外
 	*/
-	this.CircleID = function (target){
+	this.isCircleID = function (target){
 		var pattern = /^.{6}$/;
 		if (this.isPInt(target)) return pattern.test(target);
 		else return false;

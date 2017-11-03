@@ -28,7 +28,7 @@
 						" '" + r_teamid + "', " + 
 						" (SELECT MissionGroupID FROM " + 
 						" (SELECT " + 
-						" IFNULL(max(`BifMissionGroup`.`MissionGroupID`) + 1,'100000') AS MissionGroupID" + 
+						" IFNULL(max(`BifMissionGroup`.`MissionGroupID`) + 1,'100') AS MissionGroupID" + 
 						" FROM `BifMissionGroup`" + 
 						" WHERE `BifMissionGroup`.`EventID` = '" + r_eventid + "' " + 
 						" AND `BifMissionGroup`.`TeamID` = '" + r_teamid + "') AS TMP)," + 

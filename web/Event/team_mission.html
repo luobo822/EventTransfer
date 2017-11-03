@@ -13,7 +13,7 @@
 		<div data-role="page" id="team_mission">
 			<div data-role="header">
 				<h1>任务组管理界面</h1>
-				<a href="#team_mission_panel_left" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">                系统菜单</a>
+				<a href="#team_mission_panel_left" id="task_menu" data-theme="b" data-icon="gear" data-role="button" data-inline="true">系统菜单</a>
 			</div>
 			
 			<div data-role="panel" id="team_mission_panel_left" data-theme="b">
@@ -37,7 +37,7 @@
 				<a href="#" id="team_mission_create_send" class="ui-btn">创建</a>
 			</div>
 			
-			<div data-role="panel" id="team_mission_panel_right" data-theme="b" data-position="right">
+			<div data-role="panel" id="team_mission_panel_right" data-theme="b" data-position="right" data-display="overlay">
 				<div style="padding:5px 5px;">
 					<h3>任务组管理</h3>
 					<div id="team_mission_panel_right_area" data-inline="true">
@@ -139,6 +139,9 @@
 										window.location.assign("/team/mission");
 									});
 								}
+							});
+							$("#team_mission_detail").click(function() {
+								window.location.assign("/team/mission/detail?MissionGroupID=" + resData[one].MissionGroupID);
 							});
 							$("#team_mission_change").click(function() {
 								$.post("/team/mission/update",{
