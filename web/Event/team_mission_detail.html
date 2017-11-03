@@ -24,6 +24,8 @@
 			</div>
 			
 			<div data-role="panel" id="team_mission_detail_panel_level" data-theme="b" data-display="overlay">
+				<label for="team_mission_detail_panel_slider">任务权重(最高为"1"):</label>
+				<input type="range" name="team_mission_detail_panel_slider" id="team_mission_detail_panel_slider" data-highlight="true" min="1" max="99" value="99">
 				<a id="team_mission_detail_level_button" class="ui-btn">更新任务权重</a>
 			</div>
 			
@@ -48,7 +50,7 @@
 				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
 					var oUrl = location.href;
 					var getParam = function(key) {
-						var url = decodeURIComponent(oUrl);
+						var url = decodeURIComponent(location.href);
 						parameters = url.split("?");
 						params = parameters[1].split("&");
 						var paramsArray = [];
@@ -86,7 +88,7 @@
 					var makeUI = function (resData) {
 						for (one in resData) {
 							$("#team_mission_detail_area").append('<li>'
-								+ '<a href="#team_mission_detail_panel_level">'
+								+ '<a href="#team_mission_detail_panel_level" class="update" value="' + resData[one].CircleID + ',' + resData[one].Level + '">'
 									+ '<h3>[' + resData[one].CircleLocation + ']' + resData[one].CircleName + '</h3>'
 									+ '<p>权重:' + resData[one].Level + '</p>'
 								+ '</a>'
@@ -99,6 +101,15 @@
 							var listitem = $(this).parent("li");
 							listitem.remove();
 							$("#team_mission_detail_area").listview('refresh');
+						});
+						
+						$(".update").on("click",function(){
+							var prams = $(this).attr('value').split(',');
+							$("#team_mission_detail_panel_slider").val(prams[1]);
+							$("#team_mission_detail_level_button").unbind("click");
+							$("#team_mission_detail_level_button").on("click",function(){
+								alert(prams[0]);
+							});
 						});
 					}
 					
