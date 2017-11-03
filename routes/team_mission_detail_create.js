@@ -8,13 +8,13 @@
 		var r_circleidlist = req.body.circleidlist;
 		
 		console.log(JSON.stringify(r_circleidlist));
-		var valueStr = " INSERT INTO `BifMissionGroup` " + 
+		var valueStr = " INSERT INTO `BifMissionGroupDetail` " + 
 				" (`EventID`, " + 
 				" `TeamID`, " + 
 				" `MissionGroupID`, " + 
-				" `MissionGroupName`, " + 
-				" `MissionGroupType`, " + 
-				" `UserID`, " + 
+				" `DetailID`, " + 
+				" `CircleID`, " + 
+				" `Level`, " + 
 				" `Version`, " + 
 				" `UpdateTime`, " + 
 				" `CreateTime`) " + 

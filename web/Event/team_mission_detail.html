@@ -31,15 +31,14 @@
 				</div>
 			</div>
 			
-			<div role="main" class="ui-content">
-				<ul id="team_mission_area" data-role="listview" data-filter="true" data-inset="true">
-				</ul>
-			</div>
-			
 			<div data-role="popup" id="team_mission_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
 				<h3>修改任务组名称</h3>
 			</div>
 			
+			<div role="main" class="ui-content">
+				<ul id="team_mission_detail_area" data-role="listview" data-filter="true" data-inset="true" data-icon="false" data-split-icon="delete">
+				</ul>
+			</div>
 			
 			<script>
 				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
@@ -63,7 +62,7 @@
 							missiongroupid : s_missiongroupid
 						},
 						function(resData, status) {
-							//makeUI(resData);
+							makeUI(resData);
 					});
 					
 					$.post("/team/mission/detail/view/panel",
@@ -79,6 +78,24 @@
 						window.location.assign("/team/mission/view");
 					});
 					
+					var makeUI = function (resData) {
+						for (one in resData) {
+							$("#team_mission_detail_area").append('<li>'
+								+ '<a href="#">'
+									+ '<h3>TEST</h3>'
+									+ '<p>test</p>'
+								+ '</a>'
+								+ '<a href="#" class="delete">Delete</a>'
+							+ '</li>');
+						}
+						$("#team_mission_detail_area").listview('refresh');
+						
+						$(".delete").on("click",function(){
+							var listitem = $(this).parent("li");
+							listitem.remove();
+							$("#team_mission_detail_area").listview('refresh');
+						});
+					}
 					
 					var makeUIpanel = function (resData) {
 						for (one in resData) {
@@ -88,15 +105,14 @@
 						$("#team_mission_detail_controlgroup").trigger('create');
 					}
 					
-					
-					
 					$("#team_mission_detail_create").click(function() {
 						var vals=$("[name='checkbox-circle']:checked");
 						var circleidlist={};
 						circleidlist.length=vals.length;
 						if(circleidlist.length>0){
-							for(var i=0;i<circleidlist.lengt;i++){
+							for(var i=0;i<circleidlist.length;i++){
 								var prams = $(vals[i]).val().split(',');
+								circleidlist[i] = {};
 								circleidlist[i].missiongroupid=prams[0];
 								circleidlist[i].circleid=prams[1];
 							}
@@ -114,68 +130,8 @@
 						});
 					}
 					
-					
-					/*
-					var makeClick = function (resData, UserID) {
-						$("#member" + UserID).click(function() {
-							$("#membertask_group").text('');
-							$.post("/quest/task",{
-									targetid : UserID
-								},
-								function(resData, status) {
-									for ( one in resData ){
-										$("#membertask_group").append('<a href="#membertask_pop" id="task_pop'+ one +'" data-rel="popup" class="ui-btn">'
-										+ '<input type="checkbox" name="checkbox-v-2b" id="checkbox-v-2b">');
-									}
-							});
-						});
-					}*/
-					
-					var makePopClick = function (resData, one) {
-						$("#team_mission_panel_right_"+ resData[one].MissionGroupID).click(function() {
-							$("#team_mission_delete").unbind("click");
-							$("#team_mission_change").unbind("click");
-							$("#team_mission_rname").val(resData[one].MissionGroupName);
-							$("#select_team_mission").val(resData[one].MissionGroupType).selectmenu('refresh');
-							$("#team_mission_delete").click(function() {
-								var check = confirm("Only owner and leader can delete it.Are you sure？");
-								if(check){
-									$.post("/team/mission/delete",{
-											missiongroupid : resData[one].MissionGroupID
-										},
-										function(resData, status) {
-										//do sometings
-										alert("Data: " + resData + "\nStatus: " + status);
-										window.location.assign("/team/mission");
-									});
-								}
-							});
-							$("#team_mission_detail").click(function() {
-								window.location.assign("/team/mission/detail?MissionGroupID=" + resData[one].MissionGroupID);
-							});
-							$("#team_mission_change").click(function() {
-								$.post("/team/mission/update",{
-										missiongroupid : resData[one].MissionGroupID ,
-										missiongroupname : $("#team_mission_rname").val(),
-										missiongrouptype : $("#select_team_mission").val()
-									},
-									function(resData, status) {
-										//do sometings
-										window.location.assign("/team/mission");
-								});
-							});
-						});
-					}
-					
 					//release
 					$(document).unbind("pagecontainerchange");
-				});
-
-				 //ajax跨域对应 Start
-				$.ajaxSetup({
-					xhrFields: {
-						withCredentials: true
-					}
 				});
 				
 			</script>
