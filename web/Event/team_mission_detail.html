@@ -159,27 +159,47 @@
 					var makeUI = function (resData) {
 						for (one in resData) {
 							$("#team_mission_detail_area").append('<li>'
-								+ '<a href="#team_mission_detail_panel_level" class="update" value="' + resData[one].CircleID + ',' + resData[one].Level + '">'
+								+ '<a href="#team_mission_detail_panel_level" class="update" value="' + resData[one].DetailID + ',' + resData[one].Level + '">'
 									+ '<h3>[' + resData[one].CircleLocation + ']' + resData[one].CircleName + '</h3>'
 									+ '<p>权重:' + resData[one].Level + '</p>'
 								+ '</a>'
-								+ '<a href="#" class="delete">Delete</a>'
+								+ '<a href="#" class="delete" value="' + resData[one].DetailID + '">Delete</a>'
 							+ '</li>');
 						}
 						$("#team_mission_detail_area").listview('refresh');
 						
 						$(".delete").on("click",function(){
 							var listitem = $(this).parent("li");
-							listitem.remove();
-							$("#team_mission_detail_area").listview('refresh');
+							var s_detailid = $(this).attr('value');
+							$.post("/team/mission/detail/delete",
+								{
+									missiongroupid : s_missiongroupid ,
+									detailid : s_detailid
+								},
+								function(resData, status) {
+									listitem.remove();
+									$("#team_mission_detail_area").listview('refresh');
+							});
 						});
 						
 						$(".update").on("click",function(){
 							var prams = $(this).attr('value').split(',');
-							$("#team_mission_detail_panel_slider").val(prams[1]);
+							var s_detailid = prams[0];
+							var s_level = prams[1];
+							$("#team_mission_detail_panel_slider").val(s_level);
+							$("#team_mission_detail_panel_slider").slider().slider("refresh");
 							$("#team_mission_detail_level_button").unbind("click");
 							$("#team_mission_detail_level_button").on("click",function(){
-								alert(prams[0]);
+								s_level = $("#team_mission_detail_panel_slider").val();
+								$.post("/team/mission/detail/update",
+									{
+										missiongroupid : s_missiongroupid ,
+										detailid : s_detailid ,
+										level : s_level ,
+									},
+									function() {
+										window.location.assign(oUrl);
+								});
 							});
 						});
 					}

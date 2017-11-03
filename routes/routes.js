@@ -304,6 +304,14 @@ module.exports = function(self) {
 	// @type 网页路由
 	// @target XXX
 	routesGET['/team/mission'] = function(req, res) {
+		try {
+			if ( !req.session.userconfig.eventselected.eventid ) {
+				res.redirect('/quest/view');
+			}
+		}
+		catch (e) {
+			res.redirect('/quest/view');
+		}
 		res.setHeader('Content-Type', 'text/html');
 		res.send(self.cache_get('team_mission.html'));
 	};
@@ -2043,6 +2051,8 @@ module.exports = function(self) {
 	routesPOST['/team/mission/detail/view'] = require('./team_mission_detail_view.js')(world);
 		routesPOST['/team/mission/detail/view/panel'] = require('./team_mission_detail_view_panel.js')(world);
 	routesPOST['/team/mission/detail/create'] = require('./team_mission_detail_create.js')(world);
+	routesPOST['/team/mission/detail/delete'] = require('./team_mission_detail_delete.js')(world);
+	routesPOST['/team/mission/detail/update'] = require('./team_mission_detail_update.js')(world);
 		
 	routesPOST['/package/lock'] = require('./package_lock.js')(world);
 	routesPOST['/package/unlock'] = require('./package_unlock.js')(world);
