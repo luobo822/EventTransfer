@@ -1,0 +1,172 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+	</head>
+
+	<body>
+		<div data-role="page" id="team_mission_detail">
+			<div data-role="header">
+				<h1>任务组管理界面</h1>
+				<a href="#team_mission_detail_panel_left" data-theme="b" data-icon="gear" data-role="button" data-inline="true">系统菜单</a>
+				<a href="#team_mission_detail_panel_right" data-theme="b" data-icon="gear" data-role="button" data-inline="true">添加任务</a>
+			</div>
+			
+			<div data-role="panel" id="team_mission_detail_panel_left" data-theme="b" data-display="overlay">
+				<div data-inline="true">
+					<a id="team_mission_detail_back_button" data-icon="home" class="ui-btn">返回</a>
+				</div>
+			</div>
+			
+			<div data-role="panel" id="team_mission_detail_panel_right" data-theme="b" data-position="right" data-display="overlay">
+				<a id="team_mission_detail_create" class="ui-btn">添加目标社团</a>
+				<div data-role="controlgroup" data-filter="true">
+					<div class="ui-controlgroup-controls" id="team_mission_detail_controlgroup">
+					</div>
+				</div>
+			</div>
+			
+			<div role="main" class="ui-content">
+				<ul id="team_mission_area" data-role="listview" data-filter="true" data-inset="true">
+				</ul>
+			</div>
+			
+			<div data-role="popup" id="team_mission_pop" data-theme="a" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
+				<h3>修改任务组名称</h3>
+			</div>
+			
+			
+			<script>
+				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
+					var getParam = function(key) {
+						var url = decodeURIComponent(location.href);
+						parameters = url.split("?");
+						params = parameters[1].split("&");
+						var paramsArray = [];
+						for (i = 0; i < params.length; i++) {
+							neet = params[i].split("=");
+							paramsArray.push(neet[0]);
+							paramsArray[neet[0]] = neet[1];
+						}
+						var categoryKey = paramsArray[key];
+						return categoryKey;
+					}
+					
+					$.post("/team/mission/detail/view",
+						{
+							missiongroupid : getParam("MissionGroupID")
+						},
+						function(resData, status) {
+							//makeUI(resData);
+					});
+					
+					$.post("/team/mission/detail/view/panel",
+						{
+							missiongroupid : getParam("MissionGroupID")
+						},
+						function(resData, status) {
+							makeUIpanel(resData);
+					});
+					
+					
+					$("#team_mission_detail_back_button").click(function() {
+						window.location.assign("/team/mission/view");
+					});
+					
+					
+					$("#team_mission_detail_create").click(function() {
+						/*$.post("/team/mission/create",{
+								missiongroupname : $("#team_mission_create_name").val(),
+								missiongrouptype : $("#team_mission_create_select").val()
+							},
+							function(resData, status) {
+								alert("Data: " + resData + "\nStatus: " + status);
+								window.location.assign("/team/mission");
+						});*/
+						
+						var vals = $("[name='checkbox-circle']:checked");
+						var 
+						
+					});
+					
+					var makeUIpanel = function (resData) {
+						for (one in resData) {
+							$("#team_mission_detail_controlgroup").append('<input type="checkbox" name="checkbox-circle" id="checkbox-circle-' + resData[one].CircleID + '" value="' + resData[one].CircleID + '">'
+							+ '<label for="checkbox-circle-' + resData[one].CircleID + '">' + resData[one].CircleLocation + ' ' + resData[one].CircleName + '</label>');
+						}
+						$("#team_mission_detail_controlgroup").trigger('create');
+					}
+					
+					/*
+					var makeClick = function (resData, UserID) {
+						$("#member" + UserID).click(function() {
+							$("#membertask_group").text('');
+							$.post("/quest/task",{
+									targetid : UserID
+								},
+								function(resData, status) {
+									for ( one in resData ){
+										$("#membertask_group").append('<a href="#membertask_pop" id="task_pop'+ one +'" data-rel="popup" class="ui-btn">'
+										+ '<input type="checkbox" name="checkbox-v-2b" id="checkbox-v-2b">');
+									}
+							});
+						});
+					}*/
+					
+					var makePopClick = function (resData, one) {
+						$("#team_mission_panel_right_"+ resData[one].MissionGroupID).click(function() {
+							$("#team_mission_delete").unbind("click");
+							$("#team_mission_change").unbind("click");
+							$("#team_mission_rname").val(resData[one].MissionGroupName);
+							$("#select_team_mission").val(resData[one].MissionGroupType).selectmenu('refresh');
+							$("#team_mission_delete").click(function() {
+								var check = confirm("Only owner and leader can delete it.Are you sure？");
+								if(check){
+									$.post("/team/mission/delete",{
+											missiongroupid : resData[one].MissionGroupID
+										},
+										function(resData, status) {
+										//do sometings
+										alert("Data: " + resData + "\nStatus: " + status);
+										window.location.assign("/team/mission");
+									});
+								}
+							});
+							$("#team_mission_detail").click(function() {
+								window.location.assign("/team/mission/detail?MissionGroupID=" + resData[one].MissionGroupID);
+							});
+							$("#team_mission_change").click(function() {
+								$.post("/team/mission/update",{
+										missiongroupid : resData[one].MissionGroupID ,
+										missiongroupname : $("#team_mission_rname").val(),
+										missiongrouptype : $("#select_team_mission").val()
+									},
+									function(resData, status) {
+										//do sometings
+										window.location.assign("/team/mission");
+								});
+							});
+						});
+					}
+					
+					//release
+					$(document).unbind("pagecontainerchange");
+				});
+
+				 //ajax跨域对应 Start
+				$.ajaxSetup({
+					xhrFields: {
+						withCredentials: true
+					}
+				});
+				
+			</script>
+		</div>
+	</body>
+
+</html>
