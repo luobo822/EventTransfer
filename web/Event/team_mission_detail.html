@@ -7,6 +7,77 @@
 		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 		<script src="http://code.jquery.com/mobile/git/jquery.mobile-git.js"></script>
 		<link rel="stylesheet" href="http://code.jquery.com/mobile/git/jquery.mobile-git.css" />
+		<style>
+			/* Panel */
+			#team_mission_detail_panel_right.ui-panel {
+				width: 30em;
+				min-height: 100%;
+				max-height: none;
+				border-width: 0;
+				position: absolute;
+				top: 0;
+				display: block;
+			}
+			/* Panel positioning (for overlay and push) */
+			/* Panel right closed */
+			.ui-panel-position-right {
+				right: -30em;
+			}
+			/* Panel right closed animated */
+			.ui-panel-animate.ui-panel-position-right.ui-panel-display-overlay,
+			.ui-panel-animate.ui-panel-position-right.ui-panel-display-push {
+				right: 0;
+				-webkit-transform: translate3d(30em,0,0);
+				-moz-transform: translate3d(30em,0,0);
+				transform: translate3d(30em,0,0);
+			}
+			/* Panel right open */
+			.ui-panel-position-right.ui-panel-display-reveal, /* Unset "panel right closed" for reveal */
+			.ui-panel-position-right.ui-panel-open {
+				right: 0;
+			}
+			/* Panel right open animated */
+			.ui-panel-animate.ui-panel-open.ui-panel-position-right.ui-panel-display-overlay,
+			.ui-panel-animate.ui-panel-open.ui-panel-position-right.ui-panel-display-push {
+				-webkit-transform: translate3d(0,0,0);
+				transform: translate3d(0,0,0);
+				-moz-transform: none;
+			}
+			/* Wrapper and fixed toolbars positioning (for reveal and push) */
+			/* Panel right open */
+			.ui-panel-page-content-position-right {
+				left: -30em;
+				right: 30em;
+			}
+			/* Panel right open animated */
+			.ui-panel-animate.ui-panel-page-content-position-right {
+				left: 0;
+				right: 0;
+				-webkit-transform: translate3d(-30em,0,0);
+				-moz-transform: translate3d(-30em,0,0);
+				transform: translate3d(-30em,0,0);
+			}
+			/* Dismiss model open */
+			.ui-panel-dismiss-open.ui-panel-dismiss-position-right {
+				right: 30em;
+			}
+			/* Responsive: wrap on wide viewports once open */
+			@media (min-width:55em) {
+				.ui-responsive-panel .ui-panel-page-content-open.ui-panel-page-content-position-left {
+					margin-right: 17em;
+				}
+				.ui-responsive-panel .ui-panel-page-content-open.ui-panel-page-content-position-right {
+					margin-left: 30em;
+				}
+				.ui-responsive-panel .ui-panel-page-content-open {
+					width: auto;	
+				}
+				.ui-responsive-panel .ui-panel-dismiss-display-push,
+				.ui-responsive-panel.ui-page-active ~ .ui-panel-dismiss-display-push {
+					display: none;
+				}
+			}
+		</style>
 	</head>
 
 	<body>
@@ -82,7 +153,7 @@
 					
 					
 					$("#team_mission_detail_back_button").click(function() {
-						window.location.assign("/team/mission/view");
+						window.location.assign("/team/mission");
 					});
 					
 					var makeUI = function (resData) {
