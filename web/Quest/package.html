@@ -39,6 +39,7 @@
 			<div data-role="content">
 
 				<div id="packCircle">Loading...</div>
+				<a id="mikotoif_pass" class="ui-btn ui-corner-all" style="position: fixed; top: 50px; right: 10px; background: rgb(255, 100, 100); z-index:999; font-size: 12px;">PASS该任务</a>
 				<a href="#" id="toDOUMIN" target="view_window" class="ui-btn ui-corner-all ui-first-child">查询该社团的信息</a>
 
 				<select name="select-choice-status" id="select-choice-status" data-native-menu="false">
@@ -140,6 +141,19 @@
 								window.location.assign("/package?CircleID=" + getParam("CircleID")); 
 							});
 								
+						}
+					});
+					$("#mikotoif_pass").click(function() {
+						var r = confirm("确定要PASS该任务么?");
+						if (r) {
+							var s_cmdtype = "ct";
+							var s_usernickname = req.user.usernickname;
+							var s_circlelocation = package[0].CircleLocation;
+							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+							$.get(m_url,
+							function (resdata, status) {
+								alert("ResData: " + resdata + "\nStatus: " + status);
+							});
 						}
 					});
 					$.post("/package", {

@@ -13,7 +13,8 @@ module.exports = function(self) {
 	var path = require('path');
 	var inspect = require('util').inspect;
 	var csv = require('comma-separated-values');
-	var fs = require('fs')
+	var fs = require('fs');
+	var http = require('http');
 
 	var LocalStrategy = require('passport-local').Strategy;
 	
@@ -1333,6 +1334,28 @@ module.exports = function(self) {
 					+ ' 提交了 ' + package[0].CircleLocation
 					+ " " + package[0].CircleName + " 的最新战况。所有物品都已完成。";
 			insertMsg(r_eventid, r_teamid, msg);
+			var s_cmdtype = "ct";
+			var s_usernickname = req.user.usernickname;
+			var s_circlelocation = package[0].CircleLocation;
+			var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+			
+			http.get(m_url, (res) => {
+				let body = '';
+				res.setEncoding('utf8');
+				
+				res.on('data', (chunk) => {
+					body += chunk;
+				});
+				
+				res.on('end', (res) => {
+					//res = JSON.parse(body);
+					res = body;
+					console.log(res);
+				});
+				
+			}).on('error', (e) => {
+				console.log(e.message); //エラー時
+			});
 		}
 		queryStr = queryStr.replace(/.$/, ";");
 		// console.log(queryStr);
