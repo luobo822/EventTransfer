@@ -34,6 +34,13 @@
 				<h4>攻击顺序</h4>
 				<div id="minetask" data-inline="true">
 				</div>
+				<label for="mikotoif_get" class="select"><h4>魔法少女AIミコト</h4></label>
+				<select name="mikotoif_get" id="mikotoif_get" data-mini="true">
+					<option value="9">当前位置</option>
+					<option value="123">東123</option>
+					<option value="45678">東45678</option>
+				</select>
+				<a id="mikotoif_get_btn" class="ui-btn">★ミコトちゃんに祈る★</a>
 				<h4>消息弹出设置</h4>
 				<div data-role="fieldcontain" id="alertFlagSetF">
 					<select name="alertFlagSet" id="alertFlagSet" data-role="slider" data-native-menu="false">
@@ -50,6 +57,7 @@
 				  <option value="OMS">其他任务组(未实装)</option>
 				  <option value="LCK">被锁定的目标</option>
 				</select>
+				
 			</div>
 			<div id="quest_sister_pop" data-role="popup" data-theme="a" style="padding:10px 10px;" class="ui-corner-all ui-popup ui-body-a ui-overlay-shadow">
 				<img src="/image/sister" />
@@ -82,7 +90,6 @@
 					}
 				});
 				
-				
 				$("#buttonToIndex").click(function() {
 					window.location.assign("/"); //防止页面样式错误;
 				});
@@ -101,6 +108,9 @@
 					$(document).unbind("pagecontainerchange");
 				});
 				var makeUI = function(resData) {
+					if(resData && resData[0] && resData[0].MyName){
+						makemikotoif(resData[0].MyName);
+					}
 					for (var i = 0; i < resData.length; i++) {
 						var lockerstr = '';
 						if ( resData[i].UserNickName  ) {
@@ -232,6 +242,40 @@
 					}
 					window.location.assign("/quest");
 				});
+				
+				var makemikotoif = function(usernickname){
+					var s_usernickname = usernickname;
+					$("#mikotoif_get").click(function() {
+						$("#mikotoif_get_btn").unbind("click");
+						$("#mikotoif_get_btn").click(function() {
+							var r = confirm("[mikotoIF]你确定以【"+ $('#mikotoif_get option:selected').text() + "】的位置情报获取任务么?");
+							if (r) {
+								var s_cmdtype = "gtr";
+								var s_checkflg = true;
+								var s_areadiv = $("#mikotoif_get").val();
+								var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&areadiv=" + s_areadiv + "&checkflg=" + s_checkflg;
+								$.get(m_url,
+									function (resdata, status) {
+										if( resdata && resdata!=""){
+											var rr = confirm(resdata);
+											if (rr) {
+												var rs_cmdtype = "gtr";
+												var rs_checkflg = false;
+												var rm_rurl = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + rs_cmdtype + "&username=" + s_usernickname + "&areadiv=" + s_areadiv + "&checkflg=" + rs_checkflg;
+												$.get(rm_rurl,
+													function (resdata, status) {
+														if(resdata && resdata!=""){
+															alert("ResData: " + resdata + "\nStatus: " + status);
+														}
+												});
+											}
+										}
+								});
+							}
+							$("#mikotoif_get_btn").unbind("click");
+						});
+					});
+				}
 			</script>
 		</div>
 	</body>

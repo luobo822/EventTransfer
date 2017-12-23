@@ -370,6 +370,7 @@ module.exports = function(self) {
 	routesGET['/quest_info'] = function(req, res) {
 		res.setHeader('Content-Type', 'application/json');
 		var r_url_parts = require('url').parse(req.url,true);
+		var myname = req.user.usernickname; 
 		//console.log(r_url_parts.query.viewtype);
 		var plussql = "";
 		if(r_url_parts.query && r_url_parts.query.viewtype){
@@ -396,6 +397,7 @@ module.exports = function(self) {
 			"`FifQuestCircle`.`CircleLocation`," +
 			"`FifQuestCircle`.`CircleName`," +
 			"`FifQuestCircle`.`CircleStatus`," +
+			"'" + myname + "' as MyName," +
 			" ( " +
 			"     SELECT `BifUser`.`UserNickName`" +
 			"     FROM `BifUser` " +

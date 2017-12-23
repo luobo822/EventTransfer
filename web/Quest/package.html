@@ -39,8 +39,11 @@
 			<div data-role="content">
 
 				<div id="packCircle">Loading...</div>
-				<a id="mikotoif_pass" class="ui-btn ui-corner-all" style="position: fixed; top: 50px; right: 10px; background: rgb(255, 100, 100); z-index:999; font-size: 12px;">PASS该任务</a>
 				<a href="#" id="toDOUMIN" target="view_window" class="ui-btn ui-corner-all ui-first-child">查询该社团的信息</a>
+				<a id="mikotoif_stat" class="ui-btn ui-corner-all" style="position: fixed; top: 50px; right: 9px; background: rgb(100, 255, 255); z-index:999; font-size: 12px;">取得</a>
+				<a id="mikotoif_resu" class="ui-btn ui-corner-all" style="position: fixed; top: 90px; right: 9px; background: rgb(100, 255, 100); z-index:999; font-size: 12px;">复活</a>
+				<a id="mikotoif_pass" class="ui-btn ui-corner-all" style="position: fixed; top: 130px; right: 10px; background: rgb(255, 255, 100); z-index:999; font-size: 12px;">跳过</a>
+				<a id="mikotoif_give" class="ui-btn ui-corner-all" style="position: fixed; top: 170px; right: 9px; background: rgb(255, 100, 100); z-index:999; font-size: 12px;">放弃</a>
 
 				<select name="select-choice-status" id="select-choice-status" data-native-menu="false">
 					<option value="FI">完成任务</option>
@@ -82,9 +85,15 @@
 			<script>
 				 //ajax跨域对应 Start
 				$.ajaxSetup({
-					xhrFields: {
-						withCredentials: true
-					}
+					//xhrFields: {
+					//	withCredentials: true
+					//}
+					//,headers: {
+					//	"Access-Control-Allow-Origin" : "*",
+					//	"Access-Control-Allow-Credentials" : true,
+					//	"Access-Control-Allow-Methods" : "PUT, GET, POST, DELETE, OPTIONS",
+					//	"Access-Control-Allow-Headers" : "X-Requested-With, AUTHORIZATION",
+					//}
 				});
 				 //ajax跨域对应 End
 				$(document).on("pagecontainerchange", function exe_when_pagecontainerchange() {
@@ -143,19 +152,6 @@
 								
 						}
 					});
-					$("#mikotoif_pass").click(function() {
-						var r = confirm("确定要PASS该任务么?");
-						if (r) {
-							var s_cmdtype = "ct";
-							var s_usernickname = req.user.usernickname;
-							var s_circlelocation = package[0].CircleLocation;
-							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
-							$.get(m_url,
-							function (resdata, status) {
-								alert("ResData: " + resdata + "\nStatus: " + status);
-							});
-						}
-					});
 					$.post("/package", {
 							CircleID: getParam("CircleID")
 						},
@@ -198,6 +194,8 @@
 					$("#package_command").click(function() {
 						window.location.assign("/action?CircleID=" + getParam("CircleID") + "&CircleLocation=" + resData[0].CircleLocation + "&CircleName=" + resData[0].CircleName);
 					});
+					
+					makemikotoif(resData[0].UserName,resData[0].CircleLocation);
 					
 					for (var i = 0; i < resData.length; i++) {
 						resData[i].bNum = parseInt(resData[i].bNum);
@@ -411,6 +409,71 @@
 						trnData = '完卖';
 					}
 					return trnData;
+				}
+				
+				var makemikotoif = function(usernickname,circlelocation){
+					var s_usernickname = usernickname;
+					var s_circlelocation = circlelocation;
+					$("#mikotoif_stat").click(function() {
+						var r = confirm("[mikotoIF]确定要取得该任务么?");
+						if (r) {
+							var s_cmdtype = "gts";
+							var s_checkflg = true;
+							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation + "&checkflg=" + s_checkflg;
+							$.get(m_url,
+								function (resdata, status) {
+									if(resdata="完了したタスクのため、まず解除を行ってください！"){
+										alert("ResData: " + resdata + "\nStatus: " + status);
+									}else if( resdata && resdata!=""){
+										var rr = confirm(resdata);
+										if (rr) {
+											var rs_cmdtype = "gts";
+											var rs_checkflg = false;
+											var rm_rurl = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + rs_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation + "&checkflg=" + rs_checkflg;
+											$.get(rm_rurl,
+												function (resdata, status) {
+													if(resdata && resdata!=""){
+														alert("ResData: " + resdata + "\nStatus: " + status);
+													}
+											});
+										}
+									}
+							});
+						}
+					});
+					$("#mikotoif_resu").click(function() {
+						var r = confirm("[mikotoIF]确定要复活该任务么?");
+						if (r) {
+							var s_cmdtype = "rt";
+							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+							$.get(m_url,
+								function (resdata, status) {
+									alert("ResData: " + resdata + "\nStatus: " + status);
+							});
+						}
+					});
+					$("#mikotoif_pass").click(function() {
+						var r = confirm("[mikotoIF]确定要跳过该任务么?");
+						if (r) {
+							var s_cmdtype = "nct";
+							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+							$.get(m_url,
+								function (resdata, status) {
+									alert("ResData: " + resdata + "\nStatus: " + status);
+							});
+						}
+					});
+					$("#mikotoif_give").click(function() {
+						var r = confirm("[mikotoIF]确定要放弃该任务么?");
+						if (r) {
+							var s_cmdtype = "at";
+							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+							$.get(m_url,
+								function (resdata, status) {
+									alert("ResData: " + resdata + "\nStatus: " + status);
+							});
+						}
+					});
 				}
 			</script>
 
