@@ -259,17 +259,21 @@
 									$.get(m_url,
 										function (resdata, status) {
 											if( resdata && resdata!=""){
-												var rr = confirm(resdata);
-												if (rr) {
-													var rs_cmdtype = "gtr";
-													var rs_checkflg = false;
-													var rm_rurl = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + rs_cmdtype + "&username=" + s_usernickname + "&areadiv=" + s_areadiv + "&checkflg=" + rs_checkflg;
-													$.get(rm_rurl,
-														function (resdata, status) {
-															if(resdata && resdata!=""){
-																alert("ResData: " + resdata + "\nStatus: " + status);
-															}
-													});
+												if(resdata=="未完成のタスクを持っていますが、本当に新しいタスクがほしいですか？"){
+													var rr = confirm(resdata);
+													if (rr) {
+														var rs_cmdtype = "gtr";
+														var rs_checkflg = false;
+														var rm_rurl = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + rs_cmdtype + "&username=" + s_usernickname + "&areadiv=" + s_areadiv + "&checkflg=" + rs_checkflg;
+														$.get(rm_rurl,
+															function (resdata, status) {
+																if(resdata && resdata!=""){
+																	alert("ResData: " + resdata + "\nStatus: " + status);
+																}
+														});
+													}
+												}else{
+													alert("ResData: " + resdata + "\nStatus: " + status);
 												}
 											}
 									});
