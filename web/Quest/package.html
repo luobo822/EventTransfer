@@ -423,7 +423,7 @@
 							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation + "&checkflg=" + s_checkflg;
 							$.get(m_url,
 								function (resdata, status) {
-									if(resdata="完了したタスクのため、まず解除を行ってください！"){
+									if(resdata=="完了したタスクのため、まず解除を行ってください！"){
 										alert("ResData: " + resdata + "\nStatus: " + status);
 									}else if( resdata && resdata!=""){
 										var rr = confirm(resdata);
