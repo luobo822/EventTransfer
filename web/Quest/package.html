@@ -460,7 +460,8 @@
 							var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
 							$.get(m_url,
 								function (resdata, status) {
-									alert("ResData: " + resdata + "\nStatus: " + status);
+									//跳过不显示结果
+									//alert("ResData: " + resdata + "\nStatus: " + status);
 							});
 						}
 					});
