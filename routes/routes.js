@@ -1331,6 +1331,30 @@ module.exports = function(self) {
 					+ ' 提交了 ' + package[0].CircleLocation
 					+ " " + package[0].CircleName + " 的最新战况。但是有物品没有购入全数。";
 			insertMsg(r_eventid, r_teamid, msg);
+			var s_cmdtype = "nct";
+			var s_usernickname = req.user.usernickname;
+			var s_circlelocation = package[0].CircleLocation;
+			//console.log("mikotodebug  s_circlelocation : " + s_circlelocation);
+			var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + encodeURIComponent(s_usernickname) + "&circleid=" + encodeURIComponent(s_circlelocation);
+			
+			//console.log("mikotodebug : " + m_url);
+			http.get(m_url, (res) => {
+				let body = '';
+				res.setEncoding('utf8');
+				
+				res.on('data', (chunk) => {
+					body += chunk;
+				});
+				
+				res.on('end', (res) => {
+					//res = JSON.parse(body);
+					res = body;
+					console.log(res);
+				});
+				
+			}).on('error', (e) => {
+				console.log(e.message); //エラー時
+			});
 		} else if ( package[0].Status == "FI" && finishFlag == 'Y'){
 			var msg = req.user.usernickname
 					+ ' 提交了 ' + package[0].CircleLocation

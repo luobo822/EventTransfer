@@ -263,7 +263,8 @@
 						var valueT = Number($("#goodsText" + num).val());
 						if (valueT == 1 && ( $("#saveCheck").prop('checked') == false ) ) {
 							$("#goodsFlip" + num).val("SO").flipswitch("refresh");
-							$("#goodsFlip" + num).flipswitch("disable");
+							//完卖式样变更
+							//$("#goodsFlip" + num).flipswitch("disable");
 						}
 						if (valueT > 0 || ( $("#saveCheck").prop('checked') == true && valueT > ( resData[num].Num * -1 ) ) ) {
 							$("#goodsText" + num).val(valueT - 1);
