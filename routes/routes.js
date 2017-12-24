@@ -1339,7 +1339,10 @@ module.exports = function(self) {
 			var s_cmdtype = "ct";
 			var s_usernickname = req.user.usernickname;
 			var s_circlelocation = package[0].CircleLocation;
-			var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + s_usernickname + "&circleid=" + s_circlelocation;
+			console.log("mikotodebug  s_circlelocation : " + s_circlelocation);
+			var m_url = "http://157.7.138.169:2334/mkttools/assigntask?cmdtype=" + s_cmdtype + "&username=" + encodeURIComponent(s_usernickname) + "&circleid=" + encodeURIComponent(s_circlelocation);
+			
+			console.log("mikotodebug : " + m_url);
 			
 			http.get(m_url, (res) => {
 				let body = '';
