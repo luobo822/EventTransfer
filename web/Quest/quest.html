@@ -269,12 +269,16 @@
 															function (resdata, status) {
 																if(resdata && resdata!=""){
 																	alert("ResData: " + resdata + "\nStatus: " + status);
+																}else{
+																	alert("任务大概获取成功，请在http://157.7.138.169:2334/mkttools/showtasks页面查看");
 																}
 														});
 													}
 												}else{
 													alert("ResData: " + resdata + "\nStatus: " + status);
 												}
+											}else{
+												alert("任务大概获取成功，请在http://157.7.138.169:2334/mkttools/showtasks页面查看");
 											}
 									});
 								}
