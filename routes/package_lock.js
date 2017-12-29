@@ -10,7 +10,7 @@
 		var r_usernickname = req.user.usernickname ;
 		var r_circleid = req.body.CircleID ;
 		
-		if(!sqltls.CircleID(r_circleid)){
+		if(!sqltls.isCircleID(r_circleid)){
 			res.send("CircleID is error.");
 		}
 		
